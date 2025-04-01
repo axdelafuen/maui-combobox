@@ -8,14 +8,20 @@ using Microsoft.Maui.Layouts;
 namespace Maui.DropDown;
 
 public class DropDownBox : ContentView, INotifyPropertyChanged {
+    
+    public DropDownBox() {
+        DrawDropDown();
+    }
+    
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBox));
     public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBox), null, BindingMode.TwoWay);
     public static readonly BindableProperty ItemPathProperty = BindableProperty.Create(nameof(ItemPath), typeof(string), typeof(DropDownBox));
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(DropDownBox), string.Empty);
-    public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(DropDownBox), -1.0);
-    public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(DropDownBox), 200.0);
     public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(DropDownBox), Colors.Black);
     public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(DropDownBox), 12.0);
+
+    public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(DropDownBox), -1.0);
+    public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(DropDownBox), 200.0);
     public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(double), typeof(DropDownBox), 10.0);
     public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(DropDownBox), Colors.Black);
     public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(DropDownBox), Colors.White);
@@ -196,10 +202,6 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
 
     public SeparatorVisibility DropdownSeparatorVisibility => DropdownSeparator ? SeparatorVisibility.Default : SeparatorVisibility.None;
 
-    public DropDownBox() {
-        DrawDropDown();
-    }
-    
     private Border popupContainer = new Border();
     private Image arrowImage = new Image();
 
@@ -286,12 +288,13 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
 
         // Popup container with a shadow and border
         // ----------------------------------------------------------------------------
+        var popupCorner = new CornerRadius(DropdownCornerRadius);
+        popupContainer.SetBinding(RoundRectangle.CornerRadiusProperty, new Binding(nameof(DropdownCornerRadius), BindingMode.OneWay, source: this));
+        
         popupContainer.Content = itemListView;
         popupContainer.WidthRequest = DropDownWidth < 0 ? WidthRequest : DropDownWidth;
         popupContainer.IsVisible = false;
-        popupContainer.StrokeShape = new RoundRectangle {
-            CornerRadius = new CornerRadius(DropdownCornerRadius) // Customize the corner radius here
-        };
+        popupContainer.StrokeShape = new RoundRectangle { CornerRadius = popupCorner };
         popupContainer.SetBinding(Border.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
         popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
         popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
@@ -303,6 +306,7 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         AbsoluteLayout.SetLayoutBounds(mainButtonLayout, new Rect(0, 0, 1, 40)); // Layout button at (0, 0)
         AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
         absoluteLayout.Children.Add(mainButtonLayout);
+        
         AbsoluteLayout.SetLayoutBounds(popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth : mainButtonLayout.Width, DropDownHeight));
         AbsoluteLayout.SetLayoutFlags(popupContainer, AbsoluteLayoutFlags.None);
         absoluteLayout.Children.Add(popupContainer);
@@ -324,6 +328,10 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
                 OnPropertyChanged(nameof(DropdownSeparatorVisibility));
                 break;
 
+            case nameof(DropdownImageTint):
+                SetDropDownImage(popupContainer.IsVisible);
+                break;
+            
             case nameof(DropdownShadow):
                 if (DropdownShadow) {
                     popupContainer.Shadow = new Shadow {

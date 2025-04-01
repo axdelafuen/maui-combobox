@@ -32,16 +32,23 @@
             
             <dropDown:DropDownBox
                 WidthRequest="300"
-                DropDownWidth="400"
-                DropDownHeight="300"
-                DropdownBorderColor="DarkBlue"
-                DropdownBackgroundColor="Transparent"
-                DropdownTextColor="Crimson"
                 BackgroundColor="Transparent"
                 TextColor= "Black"
-                TextSize = "24"
+                TextSize = "18"
+                
+                DropdownCornerRadius = "0"
+                DropdownBorderWidth = "5"
+                DropDownWidth="400"
+                DropDownHeight="300"
+                DropdownClosedImageSource = "chevron_circle_right.png"
+                DropdownOpenImageSource = "chevron_circle_down.png"
+                DropdownBorderColor="DarkBlue"
+                DropdownBackgroundColor="LightGrey"
+                DropdownTextColor="DarkBlue"
+                DropdownImageTint="Green"
                 DropdownShadow="{Binding ShowShadow}"
                 DropdownSeparator="{Binding ShowSeparator}"
+                
                 ItemsSource="{Binding StringItems}"
                 SelectedItem="{Binding SelectedStringItem}"
                 Placeholder="Click for item"/>
