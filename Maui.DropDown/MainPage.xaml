@@ -29,7 +29,7 @@
                 <Label Text="Show Dropdown Shadow? "></Label>
                 <Switch IsToggled="{Binding ShowShadow}"></Switch>
             </HorizontalStackLayout>
-
+            
             <dropDown:DropDownBox
                 WidthRequest="300"
                 DropDownWidth="400"

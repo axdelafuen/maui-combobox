@@ -255,7 +255,6 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         // This list of items as a list view
         // ----------------------------------------------------------------------------
         var itemListView = new ListView {
-            ItemsSource = ItemsSource,
             VerticalOptions = LayoutOptions.Fill,
             Margin = new Thickness(5),
             SelectionMode = ListViewSelectionMode.Single,
@@ -307,7 +306,7 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         AbsoluteLayout.SetLayoutBounds(popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth : mainButtonLayout.Width, DropDownHeight));
         AbsoluteLayout.SetLayoutFlags(popupContainer, AbsoluteLayoutFlags.None);
         absoluteLayout.Children.Add(popupContainer);
-
+        
         Content = absoluteLayout;
         selectedItemLabel.BindingContext = this;
         selectedItemLabel.SetBinding(Label.TextProperty, new Binding(nameof(SelectedItem), BindingMode.OneWay, source: this));
@@ -315,7 +314,6 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         // Placeholder management
         // ----------------------------------------------------------------------------
         PropertyChanged += (_, e) => {
-            Console.WriteLine($"PropertyChanged: {e.PropertyName}");
             switch (e.PropertyName) {
             case nameof(SelectedItem):
             case nameof(Placeholder):
@@ -334,10 +332,6 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
                         Radius = 10
                     };
                 } else popupContainer.Shadow = null!;
-                break;
-
-            case nameof(ItemsSource):
-                itemListView.ItemsSource = ItemsSource;
                 break;
             }
         };
