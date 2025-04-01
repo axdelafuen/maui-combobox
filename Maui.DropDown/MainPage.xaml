@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dropDown="clr-namespace:Maui.DropDown"
+             x:DataType="dropDown:MainPage"
+             x:Class="Maui.DropDown.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="dotnet_bot.png"
+                HeightRequest="185"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a hovercraft number nine" />
+
+            <Label
+                Text="Hello, World!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <dropDown:DropDownBox
+                WidthRequest="150"
+                DropDownWidth="200"
+                DropDownHeight="300"
+                DropdownBorderColor="DarkBlue"
+                DropdownBackgroundColor="BlueViolet"
+                DropdownTextColor="White"
+                BackgroundColor="Transparent"
+                TextColor= "Black"
+                TextSize = "24"
+                ItemsSource="{Binding StringItems}"
+                SelectedItem="{Binding SelectedStringItem}"
+                Placeholder="Click for item"
+            />
+
+            <dropDown:DropDownBox
+                WidthRequest="150"
+                DropDownWidth="200"
+                DropDownHeight="300"
+                DropdownBorderColor="DarkBlue"
+                DropdownBackgroundColor="LightBlue"
+                DropdownTextColor="White"
+                BackgroundColor="LightCyan"
+                TextColor="Black"
+                ItemPath="Text"
+                ItemsSource="{Binding ObjectItems}"
+                SelectedItem="{Binding SelectedObjectItem}"
+                Placeholder="Click for Drop Down Item"
+            />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
