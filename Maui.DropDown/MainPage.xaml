@@ -21,19 +21,18 @@
                 SemanticProperties.HeadingLevel="Level1" />
 
             <dropDown:DropDownBox
-                WidthRequest="150"
-                DropDownWidth="200"
+                WidthRequest="300"
+                DropDownWidth="400"
                 DropDownHeight="300"
                 DropdownBorderColor="DarkBlue"
-                DropdownBackgroundColor="BlueViolet"
+                DropdownBackgroundColor="LightCyan"
                 DropdownTextColor="White"
                 BackgroundColor="Transparent"
                 TextColor= "Black"
                 TextSize = "24"
                 ItemsSource="{Binding StringItems}"
                 SelectedItem="{Binding SelectedStringItem}"
-                Placeholder="Click for item"
-            />
+                Placeholder="Click for item"/>
 
             <dropDown:DropDownBox
                 WidthRequest="150"
@@ -41,14 +40,14 @@
                 DropDownHeight="300"
                 DropdownBorderColor="DarkBlue"
                 DropdownBackgroundColor="LightBlue"
+                DropdownBorderWidth="5"
                 DropdownTextColor="White"
                 BackgroundColor="LightCyan"
                 TextColor="Black"
                 ItemPath="Text"
                 ItemsSource="{Binding ObjectItems}"
                 SelectedItem="{Binding SelectedObjectItem}"
-                Placeholder="Click for Drop Down Item"
-            />
+                Placeholder="Click for Drop Down Item"/>
 
         </VerticalStackLayout>
     </ScrollView>

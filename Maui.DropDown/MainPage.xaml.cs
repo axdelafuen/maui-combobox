@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Maui.Controls;
 
 namespace Maui.DropDown;
@@ -6,13 +7,14 @@ namespace Maui.DropDown;
 public partial class MainPage : ContentPage {
     public MainPage() {
         InitializeComponent();
+        BindingContext = this;
     }
     
     public string SelectedStringItem { get; set; } = "Item 1";
-    public List<object> StringItems => ["Item 1", "Item 2", "Item 3", "Number 4", "Number 5", "Control", "Kaos", "Spectre"];
+    public ObservableCollection<object> StringItems => ["Item 1", "Item 2", "Item 3", "Number 4", "Number 5", "Control", "Kaos", "Spectre"];
 
     public DropDownItem? SelectedObjectItem { get; set; }
-    public List<DropDownItem> ObjectItems => [
+    public ObservableCollection<DropDownItem> ObjectItems => [
         new() { Text = "Alpha", Value = "Item 1" },
         new() { Text = "Beta", Value = "Item 2" },
         new() { Text = "Charlie", Value = "Item 3" },
@@ -40,7 +42,6 @@ public partial class MainPage : ContentPage {
         new() { Text = "Yes", Value = "Item 25" },
         new() { Text = "Zulu", Value = "Item 26" }
     ];
-
 }
 
 public class DropDownItem() {
