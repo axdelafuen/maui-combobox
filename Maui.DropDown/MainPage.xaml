@@ -20,31 +20,44 @@
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
+            <HorizontalStackLayout>
+                <Label Text="Show Dropdown Separators? "></Label>
+                <Switch IsToggled="{Binding ShowSeparator}"></Switch>
+            </HorizontalStackLayout>
+            
+            <HorizontalStackLayout>
+                <Label Text="Show Dropdown Shadow? "></Label>
+                <Switch IsToggled="{Binding ShowShadow}"></Switch>
+            </HorizontalStackLayout>
+
             <dropDown:DropDownBox
                 WidthRequest="300"
                 DropDownWidth="400"
                 DropDownHeight="300"
                 DropdownBorderColor="DarkBlue"
-                DropdownBackgroundColor="LightCyan"
-                DropdownTextColor="White"
+                DropdownBackgroundColor="Transparent"
+                DropdownTextColor="Crimson"
                 BackgroundColor="Transparent"
                 TextColor= "Black"
                 TextSize = "24"
+                DropdownShadow="{Binding ShowShadow}"
+                DropdownSeparator="{Binding ShowSeparator}"
                 ItemsSource="{Binding StringItems}"
                 SelectedItem="{Binding SelectedStringItem}"
                 Placeholder="Click for item"/>
 
             <dropDown:DropDownBox
                 WidthRequest="150"
-                DropDownWidth="200"
                 DropDownHeight="300"
                 DropdownBorderColor="DarkBlue"
                 DropdownBackgroundColor="LightBlue"
                 DropdownBorderWidth="5"
-                DropdownTextColor="White"
+                DropdownTextColor="Black"
                 BackgroundColor="LightCyan"
                 TextColor="Black"
                 ItemPath="Text"
+                DropdownShadow="{Binding ShowShadow}"
+                DropdownSeparator="{Binding ShowSeparator}"
                 ItemsSource="{Binding ObjectItems}"
                 SelectedItem="{Binding SelectedObjectItem}"
                 Placeholder="Click for Drop Down Item"/>

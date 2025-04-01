@@ -5,11 +5,30 @@ using Microsoft.Maui.Controls;
 namespace Maui.DropDown;
 
 public partial class MainPage : ContentPage {
+    private bool _showSeparator = true;
+    private bool _showShadow = true;
+
     public MainPage() {
         InitializeComponent();
         BindingContext = this;
     }
-    
+
+    public bool ShowSeparator {
+        get => _showSeparator;
+        set {
+            _showSeparator = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowShadow {
+        get => _showShadow;
+        set {
+            _showShadow = value;
+            OnPropertyChanged();
+        }
+    }
+
     public string SelectedStringItem { get; set; } = "Item 1";
     public ObservableCollection<object> StringItems => ["Item 1", "Item 2", "Item 3", "Number 4", "Number 5", "Control", "Kaos", "Spectre"];
 

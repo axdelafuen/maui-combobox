@@ -1,4 +1,5 @@
 using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
@@ -6,7 +7,7 @@ using Microsoft.Maui.Layouts;
 
 namespace Maui.DropDown;
 
-public class DropDownBox : ContentView {
+public class DropDownBox : ContentView, INotifyPropertyChanged {
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBox));
     public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBox), null, BindingMode.TwoWay);
     public static readonly BindableProperty ItemPathProperty = BindableProperty.Create(nameof(ItemPath), typeof(string), typeof(DropDownBox));
@@ -33,7 +34,7 @@ public class DropDownBox : ContentView {
     /// </summary>
     public IEnumerable ItemsSource {
         get => (IEnumerable)GetValue(ItemsSourceProperty);
-        set { SetValue(ItemsSourceProperty, value); }
+        set => SetValue(ItemsSourceProperty, value);
     }
 
     /// <summary>
@@ -192,12 +193,13 @@ public class DropDownBox : ContentView {
         get => (bool)GetValue(DropdownSeparatorProperty);
         set => SetValue(DropdownSeparatorProperty, value);
     }
+
     public SeparatorVisibility DropdownSeparatorVisibility => DropdownSeparator ? SeparatorVisibility.Default : SeparatorVisibility.None;
 
     public DropDownBox() {
         DrawDropDown();
     }
-
+    
     private Border popupContainer = new Border();
     private Image arrowImage = new Image();
 
@@ -259,6 +261,7 @@ public class DropDownBox : ContentView {
             SelectionMode = ListViewSelectionMode.Single,
             ItemTemplate = new DataTemplate(() => {
                 var label = new Label {
+                    Margin = new Thickness(5,0,0,0),
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalOptions = LayoutOptions.Fill,
                 };
@@ -272,7 +275,7 @@ public class DropDownBox : ContentView {
         itemListView.SetBinding(ListView.ItemsSourceProperty, new Binding(nameof(ItemsSource), BindingMode.TwoWay, source: this));
         itemListView.SetBinding(ListView.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
         itemListView.SetBinding(ListView.SeparatorColorProperty, new Binding(nameof(DropdownTextColor), BindingMode.OneWay, source: this));
-        itemListView.SetBinding(ListView.SeparatorVisibilityProperty, new Binding(nameof(DropdownSeparatorVisibility), BindingMode.OneWay, source: this));
+        itemListView.SetBinding(ListView.SeparatorVisibilityProperty, new Binding(nameof(DropdownSeparatorVisibility), BindingMode.TwoWay, source: this));
 
         itemListView.ItemTapped += (_, e) => {
             if (e?.Item is { } item) {
@@ -293,17 +296,7 @@ public class DropDownBox : ContentView {
         popupContainer.SetBinding(Border.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
         popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
         popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
-        if (DropdownShadow) {
-            popupContainer.Shadow = new Shadow {
-                Opacity = 0.2f,
-                Offset = new Point(5, 5),
-                Radius = 10
-            };
-        }
-        
-        popupContainer.Unfocused += (sender, args) => {
-            popupContainer.IsVisible = false;
-        };
+        popupContainer.Unfocused += (_,_) => popupContainer.IsVisible = false;
 
         // AbsoluteLayout to allow overlay over other content
         // ----------------------------------------------------------------------------
@@ -322,10 +315,15 @@ public class DropDownBox : ContentView {
         // Placeholder management
         // ----------------------------------------------------------------------------
         PropertyChanged += (_, e) => {
+            Console.WriteLine($"PropertyChanged: {e.PropertyName}");
             switch (e.PropertyName) {
             case nameof(SelectedItem):
             case nameof(Placeholder):
                 selectedItemLabel.Text = GetPropertyValue(SelectedItem, ItemPath, Placeholder) as string ?? string.Empty;
+                break;
+            
+            case nameof(DropdownSeparator):
+                OnPropertyChanged(nameof(DropdownSeparatorVisibility));
                 break;
 
             case nameof(DropdownShadow):
@@ -335,7 +333,7 @@ public class DropDownBox : ContentView {
                         Offset = new Point(5, 5),
                         Radius = 10
                     };
-                } else popupContainer.Shadow = new Shadow();
+                } else popupContainer.Shadow = null!;
                 break;
 
             case nameof(ItemsSource):
@@ -344,7 +342,7 @@ public class DropDownBox : ContentView {
             }
         };
     }
-
+    
     /// <summary>
     /// Retrieves the value of a specified property from the given object based on
     /// the provided property path. If the value is null or the property path is invalid,
