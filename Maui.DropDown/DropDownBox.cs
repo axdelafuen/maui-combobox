@@ -35,7 +35,6 @@ public abstract class DropDownBoxBase : ContentView, IDisposable {
     #region Bindable Properties
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBoxBase));
     public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBoxBase), null, BindingMode.TwoWay);
-    public static readonly BindableProperty ItemDisplayPathProperty = BindableProperty.Create(nameof(ItemDisplayPath), typeof(string), typeof(DropDownBoxBase));
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(DropDownBoxBase), string.Empty);
     public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(DropDownBoxBase), Colors.Black);
     public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(DropDownBoxBase), 12.0);
@@ -60,15 +59,6 @@ public abstract class DropDownBoxBase : ContentView, IDisposable {
     public IEnumerable ItemsSource {
         get => (IEnumerable)GetValue(ItemsSourceProperty);
         set => SetValue(ItemsSourceProperty, value);
-    }
-
-    /// <summary>
-    /// If the ItemSource is an object then this should be the path, or
-    /// name of the property within that object to display. 
-    /// </summary>
-    public string? ItemDisplayPath {
-        get => (string)GetValue(ItemDisplayPathProperty);
-        set => SetValue(ItemDisplayPathProperty, value);
     }
 
     /// <summary>

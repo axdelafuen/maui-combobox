@@ -71,6 +71,7 @@
                         DropdownImageTint="Green"
                         DropdownShadow="{Binding ShowShadow}"
                         DropdownSeparator="{Binding ShowSeparator}"
+
                         ItemsSource="{Binding ObjectItems}"
                         SelectedItem="{Binding SelectedObjectItem}"
                         Placeholder="Click for item"/>
