@@ -66,4 +66,5 @@ public partial class MainPage : ContentPage {
 public class DropDownItem() {
     public required string Text { get; set; }
     public required string Value { get; set; }
+    public override string ToString() => Text;
 }

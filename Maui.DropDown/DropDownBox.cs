@@ -1,59 +1,56 @@
 using System.Collections;
 using System.Diagnostics;
+using System.Globalization;
 using CommunityToolkit.Maui.Behaviors;
 using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;
 using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Layouts;
 using Application = Microsoft.Maui.Controls.Application;
 using LayoutAlignment = Microsoft.Maui.Primitives.LayoutAlignment;
 using ListView = Microsoft.Maui.Controls.ListView;
 
 namespace Maui.DropDown;
 
-public enum DropDownStyleEnum {Popup, Dropdown} 
+public enum DropDownStyleEnum { Popup, Dropdown }
 
-public class DropDownBox : ContentView, IDisposable {
+public class DropDownListBox() : DropDownBoxBase(DropDownStyleEnum.Dropdown);
+
+public class PopUpListBox() : DropDownBoxBase(DropDownStyleEnum.Popup);
+
+public abstract class DropDownBoxBase : ContentView, IDisposable {
     private Popup? _popup;
     private bool _disposed;
+    public DropDownStyleEnum DropDownStyle;
 
     private readonly Border _popupContainer = new Border();
     private Image _arrowImage = new Image();
 
-    public DropDownBox() {
+    protected DropDownBoxBase(DropDownStyleEnum dropdownStyle) {
+        DropDownStyle = dropdownStyle;
         DrawDropDown();
     }
 
     #region Bindable Properties
-    public static readonly BindableProperty DropDownStyleProperty = BindableProperty.Create(nameof(DropDownStyle), typeof(DropDownStyleEnum), typeof(DropDownBox), DropDownStyleEnum.Popup);
-    public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBox));
-    public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBox), null, BindingMode.TwoWay);
-    public static readonly BindableProperty SelectedItemPathProperty = BindableProperty.Create(nameof(SelectedItemPath), typeof(string), typeof(DropDownBox));
-    public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(DropDownBox), string.Empty);
-    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(DropDownBox), Colors.Black);
-    public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(DropDownBox), 12.0);
-    public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(DropDownBox), -1.0);
-    public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(DropDownBox), 200.0);
-    public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(DropDownBox), new CornerRadius(10), propertyChanged: CornerRadiusChanged);
-    public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(DropDownBox), Colors.Black);
-    public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(DropDownBox), Colors.White);
-    public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(DropDownBox), Colors.DarkGrey);
-    public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(DropDownBox), 1.0);
-    public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(DropDownBox), "chevron_right.png");
-    public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(DropDownBox), "chevron_down.png");
-    public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(DropDownBox));
-    public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(DropDownBox), true);
-    public static readonly BindableProperty DropdownSeparatorProperty = BindableProperty.Create(nameof(DropdownSeparator), typeof(bool), typeof(DropDownBox), true);
-
-    /// <summary>
-    /// Specifies the visual behavior of the dropdown box. Determines whether the dropdown
-    /// opens as a popup or as a dropdown list. The available values are defined in the
-    /// DropDownStyleEnum enumeration.
-    /// </summary>
-    public DropDownStyleEnum DropDownStyle {
-        get => (DropDownStyleEnum)GetValue(DropDownStyleProperty);
-        set => SetValue(DropDownStyleProperty, value);
-    }
+    public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBoxBase));
+    public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBoxBase), null, BindingMode.TwoWay);
+    public static readonly BindableProperty ItemDisplayPathProperty = BindableProperty.Create(nameof(ItemDisplayPath), typeof(string), typeof(DropDownBoxBase));
+    public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(DropDownBoxBase), string.Empty);
+    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(DropDownBoxBase), Colors.Black);
+    public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(DropDownBoxBase), 12.0);
+    public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(DropDownBoxBase), -1.0);
+    public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(DropDownBoxBase), 200.0);
+    public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(DropDownBoxBase), new CornerRadius(10), propertyChanged: CornerRadiusChanged);
+    public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(DropDownBoxBase), Colors.Black);
+    public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(DropDownBoxBase), Colors.White);
+    public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(DropDownBoxBase), Colors.DarkGrey);
+    public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(DropDownBoxBase), 1.0);
+    public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(DropDownBoxBase), "chevron_right.png");
+    public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(DropDownBoxBase), "chevron_down.png");
+    public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(DropDownBoxBase));
+    public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(DropDownBoxBase), true);
+    public static readonly BindableProperty DropdownSeparatorProperty = BindableProperty.Create(nameof(DropdownSeparator), typeof(bool), typeof(DropDownBoxBase), true);
 
     /// <summary>
     /// The source of the dropdown list. This is either a collection of strings
@@ -69,9 +66,9 @@ public class DropDownBox : ContentView, IDisposable {
     /// If the ItemSource is an object then this should be the path, or
     /// name of the property within that object to display. 
     /// </summary>
-    public string? SelectedItemPath {
-        get => (string)GetValue(SelectedItemPathProperty);
-        set => SetValue(SelectedItemPathProperty, value);
+    public string? ItemDisplayPath {
+        get => (string)GetValue(ItemDisplayPathProperty);
+        set => SetValue(ItemDisplayPathProperty, value);
     }
 
     /// <summary>
@@ -258,12 +255,13 @@ public class DropDownBox : ContentView, IDisposable {
         var mainButtonLayout = new Grid {
             VerticalOptions = LayoutOptions.Fill,
             HorizontalOptions = LayoutOptions.Fill,
+            HeightRequest = 40
+        };
+        mainButtonLayout.SizeChanged += (_, _) => {
+            var dropdownWidth = DropDownWidth > 0 ? DropDownWidth - 2 : mainButtonLayout.Width - 2;
+            AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, mainButtonLayout.Height, dropdownWidth, DropDownHeight));
         };
 
-        //mainButtonLayout.SizeChanged += (_, _) => {
-        //    var dropdownWidth = DropDownWidth > 0 ? DropDownWidth-2 : mainButtonLayout.Width-2;
-        //    AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, mainButtonLayout.Height, dropdownWidth, DropDownHeight));
-        //};
         mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
         mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         mainButtonLayout.Children.Add(selectedItemLabel);
@@ -274,10 +272,10 @@ public class DropDownBox : ContentView, IDisposable {
         // This list of items as a list view
         // ----------------------------------------------------------------------------
         var itemListView = new ListView {
-            ItemsSource = ItemsSource,
             VerticalOptions = LayoutOptions.Fill,
             Margin = new Thickness(5),
             SelectionMode = ListViewSelectionMode.Single,
+            ItemsSource = ItemsSource,
             ItemTemplate = new DataTemplate(() => {
                 var label = new Label {
                     Margin = new Thickness(5, 0, 5, 0),
@@ -287,8 +285,8 @@ public class DropDownBox : ContentView, IDisposable {
                 label.SetBinding(Label.TextColorProperty, new Binding(nameof(DropdownTextColor), BindingMode.OneWay, source: this));
                 label.SetBinding(Label.FontSizeProperty, new Binding(nameof(TextSize), BindingMode.OneWay, source: this));
                 label.SetBinding(Label.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
-                label.SetBinding(Label.TextProperty, new Binding(SelectedItemPath ?? "."));
-                return new ViewCell { View = label };
+                label.SetBinding(Label.TextProperty, new Binding("."));
+                return label;
             }),
         };
         itemListView.SetBinding(ListView.ItemsSourceProperty, new Binding(nameof(ItemsSource), BindingMode.TwoWay, source: this));
@@ -317,16 +315,19 @@ public class DropDownBox : ContentView, IDisposable {
 
         // AbsoluteLayout to allow overlay over other content
         // ----------------------------------------------------------------------------
-        // var absoluteLayout = new AbsoluteLayout();
-        // AbsoluteLayout.SetLayoutBounds(mainButtonLayout, new Rect(0, 0, 1, 40)); // Layout button at (0, 0)
-        // AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
-        // absoluteLayout.Children.Add(mainButtonLayout);
-        //
-        // AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth -2 : WidthRequest -2, DropDownHeight));
-        // AbsoluteLayout.SetLayoutFlags(_popupContainer, AbsoluteLayoutFlags.None);
-        // absoluteLayout.Children.Add(_popupContainer);
-        //
-        Content = mainButtonLayout; //absoluteLayout;
+        if (DropDownStyle == DropDownStyleEnum.Dropdown) {
+            var absoluteLayout = new AbsoluteLayout();
+            AbsoluteLayout.SetLayoutBounds(mainButtonLayout, new Rect(0, 0, 1, 40)); // Layout button at (0, 0)
+            AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
+            absoluteLayout.Children.Add(mainButtonLayout);
+
+            AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth - 2 : WidthRequest - 2, DropDownHeight));
+            AbsoluteLayout.SetLayoutFlags(_popupContainer, AbsoluteLayoutFlags.None);
+            absoluteLayout.Children.Add(_popupContainer);
+            Content = absoluteLayout;
+        } else {
+            Content = mainButtonLayout;
+        }
         selectedItemLabel.BindingContext = this;
         selectedItemLabel.SetBinding(Label.TextProperty, new Binding(nameof(SelectedItem), BindingMode.OneWay, source: this));
 
@@ -336,7 +337,7 @@ public class DropDownBox : ContentView, IDisposable {
             switch (e.PropertyName) {
             case nameof(SelectedItem):
             case nameof(Placeholder):
-                selectedItemLabel.Text = GetPropertyValue(SelectedItem, SelectedItemPath, Placeholder) as string ?? string.Empty;
+                selectedItemLabel.Text = SelectedItem?.ToString() ?? Placeholder ?? string.Empty;;
                 break;
 
             case nameof(DropdownSeparator):
@@ -359,7 +360,7 @@ public class DropDownBox : ContentView, IDisposable {
             }
         };
     }
-
+    
     /// <summary>
     /// Retrieves the value of a specified property from the given object based on
     /// the provided property path. If the value is null or the property path is invalid,
@@ -369,7 +370,7 @@ public class DropDownBox : ContentView, IDisposable {
     /// <param name="propertyPath">The path or name of the property to retrieve the value from.</param>
     /// <param name="defaultValue">The value to return if the property path is null, invalid, or the resulting value is null.</param>
     /// <returns>The value of the specified property, or the default value if the property is null or not found.</returns>
-    private static object? GetPropertyValue(object? source, string? propertyPath, string? defaultValue = null) {
+    public static object? GetPropertyValue(object? source, string? propertyPath, string? defaultValue = null) {
         if (source == null) return defaultValue;
         if (string.IsNullOrEmpty(propertyPath)) return source;
         var property = source.GetType().GetProperty(propertyPath);
@@ -378,7 +379,7 @@ public class DropDownBox : ContentView, IDisposable {
     }
 
     private static void CornerRadiusChanged(BindableObject bindable, object oldValue, object newValue) {
-        if (bindable is DropDownBox container) container.UpdateCornerRadius();
+        if (bindable is DropDownBoxBase container) container.UpdateCornerRadius();
     }
 
     /// <summary>
@@ -408,36 +409,40 @@ public class DropDownBox : ContentView, IDisposable {
     }
 
     /// <summary>
-    /// Toggles the visibility of the popup container and updates the associated
-    /// dropdown image based on its current visibility state.
+    /// Toggles the visibility of the dropdown popup.
+    /// Depending on the configured dropdown style, either shows or hides the popup
+    /// container by updating its visibility or dynamically creating and displaying a popup.
     /// </summary>
-    private void TogglePopupOld() {
-        _popupContainer.IsVisible = !_popupContainer.IsVisible;
-        SetDropDownImage(_popupContainer.IsVisible);
-    }
-
     private void TogglePopup() {
-        if (_popup?.Parent != null) {
-            // Hide popup
-            _popup.Close();
-            _popup = null;
-            _popupContainer.IsVisible = false;
+        if (DropDownStyle == DropDownStyleEnum.Dropdown) {
+            _popupContainer.IsVisible = !_popupContainer.IsVisible;
         } else {
-            // Create and show popup
-            var bounds = GetControlBounds();
-            _popupContainer.WidthRequest = DropDownWidth > 0 ? DropDownWidth - 2 : bounds.Width - 2;
-
-            _popup = new Popup {
-                Content = _popupContainer,
-                Size = new Size(_popupContainer.WidthRequest, DropDownHeight),
-                Color = Colors.Transparent, // Make the popup background transparent
-                CanBeDismissedByTappingOutsideOfPopup = true,
-                Anchor = this,
-                VerticalOptions = LayoutAlignment.Start,
-                HorizontalOptions = LayoutAlignment.Start,
-            };
-            Application.Current?.Windows[0].Page?.ShowPopup(_popup);
-            _popupContainer.IsVisible = true;
+            if (_popup?.Parent != null) {
+                if (_popup is not null) {
+                    _popup.Close();
+                    _popup = null;
+                }
+                _popupContainer.IsVisible = false;
+            } else {
+                // Create and show popup
+                var bounds = GetControlBounds();
+                _popupContainer.WidthRequest = DropDownWidth > 0 ? DropDownWidth - 4 : bounds.Width - 4;
+                _popup = new Popup {
+                    Content = _popupContainer,
+                    Size = new Size(_popupContainer.WidthRequest - 4, DropDownHeight - 4),
+                    Color = DropdownBackgroundColor, // Make the popup background transparent
+                    CanBeDismissedByTappingOutsideOfPopup = true,
+                    Anchor = this,
+                    VerticalOptions = LayoutAlignment.Center,
+                    HorizontalOptions = LayoutAlignment.Center,
+                };
+                _popup.Closed += (sender, args) => {
+                    _popupContainer.IsVisible = false;
+                    _popup = null;
+                };
+                Application.Current?.Windows[0].Page?.ShowPopup(_popup);
+                _popupContainer.IsVisible = true;
+            }
         }
         SetDropDownImage(_popupContainer.IsVisible);
     }
@@ -466,8 +471,10 @@ public class DropDownBox : ContentView, IDisposable {
     protected virtual void Dispose(bool disposing) {
         if (!_disposed) {
             if (disposing) {
-                _popup?.Close();
-                _popup = null;
+                if (_popup is not null) {
+                    _popup?.Close();
+                    _popup = null;
+                }
             }
             _disposed = true;
         }
@@ -479,8 +486,6 @@ public static class ViewExtensions {
         var element = view as Microsoft.Maui.Controls.VisualElement;
         var x = element?.X ?? 0;
         var y = element?.Y ?? 0;
-
-        // Get absolute position by walking up the visual tree
         var parent = element?.Parent as Microsoft.Maui.Controls.VisualElement;
         while (parent != null) {
             x += parent.X;

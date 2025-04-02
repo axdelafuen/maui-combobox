@@ -27,7 +27,7 @@
 
             <Border WidthRequest="400">
                 <Grid RowDefinitions="30,300">
-                    <dropDown:DropDownBox
+                    <dropDown:PopUpListBox
                         HorizontalOptions="Fill"
                         VerticalOptions="Center"
                         BackgroundColor="Transparent"
@@ -53,7 +53,7 @@
             
             <Border WidthRequest="400">
                 <Grid RowDefinitions="70">
-                    <dropDown:DropDownBox
+                    <dropDown:PopUpListBox
                         HorizontalOptions="Fill"
                         VerticalOptions="Center"
                         BackgroundColor="Transparent"
@@ -71,15 +71,14 @@
                         DropdownImageTint="Green"
                         DropdownShadow="{Binding ShowShadow}"
                         DropdownSeparator="{Binding ShowSeparator}"
-
-                        ItemsSource="{Binding StringItems}"
-                        SelectedItem="{Binding SelectedStringItem}"
+                        ItemsSource="{Binding ObjectItems}"
+                        SelectedItem="{Binding SelectedObjectItem}"
                         Placeholder="Click for item"/>
                 </Grid>
             </Border>
             
             <Border StrokeThickness="0" WidthRequest="300">
-            <dropDown:DropDownBox
+            <dropDown:PopUpListBox
                 WidthRequest="300"
                 BackgroundColor="Transparent"
                 TextColor="Black"
@@ -96,13 +95,12 @@
                 DropdownImageTint="Green"
                 DropdownShadow="{Binding ShowShadow}"
                 DropdownSeparator="{Binding ShowSeparator}"
-
                 ItemsSource="{Binding StringItems}"
                 SelectedItem="{Binding SelectedStringItem}"
                 Placeholder="Click for item"/>
             </Border>
             
-            <dropDown:DropDownBox
+            <dropDown:DropDownListBox
                 WidthRequest="300"
                 DropDownHeight="300"
                 DropdownBackgroundColor="LightBlue"
@@ -112,7 +110,6 @@
                 DropdownTextColor="Black"
                 BackgroundColor="Green"
                 TextColor="Black"
-                SelectedItemPath="Text"
                 DropdownShadow="{Binding ShowShadow}"
                 DropdownSeparator="{Binding ShowSeparator}"
                 ItemsSource="{Binding ObjectItems }"
