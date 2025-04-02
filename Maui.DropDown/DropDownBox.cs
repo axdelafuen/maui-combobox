@@ -298,14 +298,15 @@ public abstract class DropDownBoxBase : ContentView, IDisposable {
         _popupContainer.IsVisible = false;
         _popupContainer.Margin = new Thickness(1);
         _popupContainer.Padding = new Thickness(1);
-        _popupContainer.SetBinding(Border.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
-        _popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
-        _popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
+        _popupContainer.SetBinding(BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
         _popupContainer.Unfocused += (_, _) => _popupContainer.IsVisible = false;
 
         // AbsoluteLayout to allow overlay over other content
         // ----------------------------------------------------------------------------
         if (DropDownStyle == DropDownStyleEnum.Dropdown) {
+            _popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
+            _popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
+
             var absoluteLayout = new AbsoluteLayout();
             AbsoluteLayout.SetLayoutBounds(mainButtonLayout, new Rect(0, 0, 1, 40)); // Layout button at (0, 0)
             AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
@@ -416,16 +417,16 @@ public abstract class DropDownBoxBase : ContentView, IDisposable {
             } else {
                 // Create and show popup
                 var bounds = GetControlBounds();
-                _popupContainer.WidthRequest = DropDownWidth > 0 ? DropDownWidth - 4 : bounds.Width - 4;
+                _popupContainer.WidthRequest = DropDownWidth > 0 ? DropDownWidth : bounds.Width;
                 _popup = new Popup {
                     Content = _popupContainer,
-                    Size = new Size(_popupContainer.WidthRequest - 4, DropDownHeight - 4),
-                    Color = DropdownBackgroundColor, // Make the popup background transparent
+                    Size = new Size(_popupContainer.WidthRequest, DropDownHeight),
                     CanBeDismissedByTappingOutsideOfPopup = true,
                     Anchor = this,
                     VerticalOptions = LayoutAlignment.Center,
                     HorizontalOptions = LayoutAlignment.Center,
                 };
+                _popup.SetBinding(Popup.ColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
                 _popup.Closed += (sender, args) => {
                     _popupContainer.IsVisible = false;
                     _popup = null;
