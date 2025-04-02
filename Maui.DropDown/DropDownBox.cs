@@ -1,28 +1,33 @@
 using System.Collections;
-using System.ComponentModel;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Behaviors;
+using Microsoft.Maui.Controls.PlatformConfiguration;
+using Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Layouts;
+using ListView = Microsoft.Maui.Controls.ListView;
 
 namespace Maui.DropDown;
 
-public class DropDownBox : ContentView, INotifyPropertyChanged {
+public class DropDownBox : ContentView {
+
+    private readonly Border _popupContainer = new Border();
+    private Image _arrowImage = new Image();
     
     public DropDownBox() {
         DrawDropDown();
     }
     
+    #region Bindable Properties
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBox));
     public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBox), null, BindingMode.TwoWay);
-    public static readonly BindableProperty ItemPathProperty = BindableProperty.Create(nameof(ItemPath), typeof(string), typeof(DropDownBox));
+    public static readonly BindableProperty SelectedItemPathProperty = BindableProperty.Create(nameof(SelectedItemPath), typeof(string), typeof(DropDownBox));
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(DropDownBox), string.Empty);
     public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(DropDownBox), Colors.Black);
     public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(DropDownBox), 12.0);
-
     public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(DropDownBox), -1.0);
     public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(DropDownBox), 200.0);
-    public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(double), typeof(DropDownBox), 10.0);
+    public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(DropDownBox), new CornerRadius(10), propertyChanged: CornerRadiusChanged);
     public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(DropDownBox), Colors.Black);
     public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(DropDownBox), Colors.White);
     public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(DropDownBox), Colors.DarkGrey);
@@ -47,9 +52,9 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
     /// If the ItemSource is an object then this should be the path, or
     /// name of the property within that object to display. 
     /// </summary>
-    public string? ItemPath {
-        get => (string)GetValue(ItemPathProperty);
-        set => SetValue(ItemPathProperty, value);
+    public string? SelectedItemPath {
+        get => (string)GetValue(SelectedItemPathProperty);
+        set => SetValue(SelectedItemPathProperty, value);
     }
 
     /// <summary>
@@ -74,8 +79,8 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
     /// Part of the DropDown Configuration: How rounded should the dropdown be?
     /// The default is 10. Set to 0 for square corners. 
     /// </summary>
-    public double DropdownCornerRadius {
-        get => (double)GetValue(DropdownCornerRadiusProperty);
+    public CornerRadius DropdownCornerRadius {
+        get => (CornerRadius)GetValue(DropdownCornerRadiusProperty);
         set => SetValue(DropdownCornerRadiusProperty, value);
     }
 
@@ -201,10 +206,8 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
     }
 
     public SeparatorVisibility DropdownSeparatorVisibility => DropdownSeparator ? SeparatorVisibility.Default : SeparatorVisibility.None;
-
-    private Border popupContainer = new Border();
-    private Image arrowImage = new Image();
-
+    #endregion
+   
     /// <summary>
     /// Renders the dropdown menu, handling its visual update and ensuring
     /// that it is properly displayed within the parent container.
@@ -221,84 +224,79 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         selectedItemLabel.SetBinding(Label.TextColorProperty, new Binding(nameof(TextColor), BindingMode.OneWay, source: this));
         selectedItemLabel.SetBinding(Label.FontSizeProperty, new Binding(nameof(TextSize), BindingMode.OneWay, source: this));
         
-        // the up/down image. Use properties to change what .png is used.  
+        // The up/down image. Use properties to change what .png is used. (must be PNG)  
         // ----------------------------------------------------------------------------
-        arrowImage = new Image {
+        _arrowImage = new Image {
             Source = DropdownClosedImageSource,
             HorizontalOptions = LayoutOptions.End,
             VerticalOptions = LayoutOptions.Center,
-            WidthRequest = 20,
-            HeightRequest = 20
+            Margin = new Thickness(1, 1, 1, 1),
         };
         var togglePopupGesture = new TapGestureRecognizer();
         togglePopupGesture.Tapped += (_, _) => TogglePopup();
         selectedItemLabel.GestureRecognizers.Add(togglePopupGesture);
-        arrowImage.GestureRecognizers.Add(togglePopupGesture);
+        _arrowImage.GestureRecognizers.Add(togglePopupGesture);
 
         // Main container for the label and icon
         // ----------------------------------------------------------------------------
         var mainButtonLayout = new Grid {
-            Padding = new Thickness(10),
             VerticalOptions = LayoutOptions.Fill,
             HorizontalOptions = LayoutOptions.Fill,
-            HeightRequest = 40
         };
-        mainButtonLayout.SizeChanged += (sender, _) => {
-            var dropdownWidth = DropDownWidth > 0 ? DropDownWidth : mainButtonLayout.Width;
-            AbsoluteLayout.SetLayoutBounds(popupContainer, new Rect(0, mainButtonLayout.Height, dropdownWidth, DropDownHeight));
+        mainButtonLayout.SizeChanged += (_, _) => {
+            var dropdownWidth = DropDownWidth > 0 ? DropDownWidth-2 : mainButtonLayout.Width-2;
+            AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, mainButtonLayout.Height, dropdownWidth, DropDownHeight));
         };
         mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
-        mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = 30 });
+        mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         mainButtonLayout.Children.Add(selectedItemLabel);
-        mainButtonLayout.Children.Add(arrowImage);
         mainButtonLayout.SetColumn(selectedItemLabel, 0);
-        mainButtonLayout.SetColumn(arrowImage, 1);
+        mainButtonLayout.Children.Add(_arrowImage);
+        mainButtonLayout.SetColumn(_arrowImage, 1);
 
         // This list of items as a list view
         // ----------------------------------------------------------------------------
         var itemListView = new ListView {
+            ItemsSource = ItemsSource,
             VerticalOptions = LayoutOptions.Fill,
             Margin = new Thickness(5),
             SelectionMode = ListViewSelectionMode.Single,
             ItemTemplate = new DataTemplate(() => {
                 var label = new Label {
-                    Margin = new Thickness(5,0,0,0),
+                    Margin = new Thickness(5,0,5,0),
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalOptions = LayoutOptions.Fill,
                 };
                 label.SetBinding(Label.TextColorProperty, new Binding(nameof(DropdownTextColor), BindingMode.OneWay, source: this));
                 label.SetBinding(Label.FontSizeProperty, new Binding(nameof(TextSize), BindingMode.OneWay, source: this));
                 label.SetBinding(Label.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
-                label.SetBinding(Label.TextProperty, new Binding(ItemPath ?? "."));
+                label.SetBinding(Label.TextProperty, new Binding(SelectedItemPath ?? "."));
                 return new ViewCell { View = label };
             }),
         };
         itemListView.SetBinding(ListView.ItemsSourceProperty, new Binding(nameof(ItemsSource), BindingMode.TwoWay, source: this));
         itemListView.SetBinding(ListView.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
         itemListView.SetBinding(ListView.SeparatorColorProperty, new Binding(nameof(DropdownTextColor), BindingMode.OneWay, source: this));
-        itemListView.SetBinding(ListView.SeparatorVisibilityProperty, new Binding(nameof(DropdownSeparatorVisibility), BindingMode.TwoWay, source: this));
-
+        itemListView.SetBinding(ListView.SeparatorVisibilityProperty, new Binding(nameof(DropdownSeparatorVisibility), BindingMode.OneWay, source: this));
+        itemListView.On<iOS>().SetSeparatorStyle(SeparatorStyle.FullWidth);
         itemListView.ItemTapped += (_, e) => {
             if (e?.Item is { } item) {
                 SelectedItem = item;
-                popupContainer.IsVisible = false; // Hide dropdown
+                _popupContainer.IsVisible = false; // Hide dropdown
                 SetDropDownImage(false);
             }
         };
 
         // Popup container with a shadow and border
         // ----------------------------------------------------------------------------
-        var popupCorner = new CornerRadius(DropdownCornerRadius);
-        popupContainer.SetBinding(RoundRectangle.CornerRadiusProperty, new Binding(nameof(DropdownCornerRadius), BindingMode.OneWay, source: this));
-        
-        popupContainer.Content = itemListView;
-        popupContainer.WidthRequest = DropDownWidth < 0 ? WidthRequest : DropDownWidth;
-        popupContainer.IsVisible = false;
-        popupContainer.StrokeShape = new RoundRectangle { CornerRadius = popupCorner };
-        popupContainer.SetBinding(Border.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
-        popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
-        popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
-        popupContainer.Unfocused += (_,_) => popupContainer.IsVisible = false;
+        _popupContainer.Content = itemListView;
+        _popupContainer.IsVisible = false;
+        _popupContainer.Margin = new Thickness(1);
+        _popupContainer.Padding= new Thickness(1);
+        _popupContainer.SetBinding(Border.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
+        _popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
+        _popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
+        _popupContainer.Unfocused += (_,_) => _popupContainer.IsVisible = false;
 
         // AbsoluteLayout to allow overlay over other content
         // ----------------------------------------------------------------------------
@@ -307,9 +305,9 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
         absoluteLayout.Children.Add(mainButtonLayout);
         
-        AbsoluteLayout.SetLayoutBounds(popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth : mainButtonLayout.Width, DropDownHeight));
-        AbsoluteLayout.SetLayoutFlags(popupContainer, AbsoluteLayoutFlags.None);
-        absoluteLayout.Children.Add(popupContainer);
+        AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth -2 : WidthRequest -2, DropDownHeight));
+        AbsoluteLayout.SetLayoutFlags(_popupContainer, AbsoluteLayoutFlags.None);
+        absoluteLayout.Children.Add(_popupContainer);
         
         Content = absoluteLayout;
         selectedItemLabel.BindingContext = this;
@@ -321,7 +319,7 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
             switch (e.PropertyName) {
             case nameof(SelectedItem):
             case nameof(Placeholder):
-                selectedItemLabel.Text = GetPropertyValue(SelectedItem, ItemPath, Placeholder) as string ?? string.Empty;
+                selectedItemLabel.Text = GetPropertyValue(SelectedItem, SelectedItemPath, Placeholder) as string ?? string.Empty;
                 break;
             
             case nameof(DropdownSeparator):
@@ -329,17 +327,17 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
                 break;
 
             case nameof(DropdownImageTint):
-                SetDropDownImage(popupContainer.IsVisible);
+                SetDropDownImage(_popupContainer.IsVisible);
                 break;
             
             case nameof(DropdownShadow):
                 if (DropdownShadow) {
-                    popupContainer.Shadow = new Shadow {
-                        Opacity = 0.2f,
+                    _popupContainer.Shadow = new Shadow {
+                        Opacity = 0.25f,
                         Offset = new Point(5, 5),
                         Radius = 10
                     };
-                } else popupContainer.Shadow = null!;
+                } else _popupContainer.Shadow = null!;
                 break;
             }
         };
@@ -362,15 +360,30 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
         return string.IsNullOrEmpty(value?.ToString()) ? defaultValue : property?.GetValue(source);
     }
 
+    private static void CornerRadiusChanged(BindableObject bindable, object oldValue, object newValue) {
+        if (bindable is DropDownBox container) container.UpdateCornerRadius();
+    }
+
+    /// <summary>
+    /// Updates the corner radius of the dropdown's popup container to match the specified
+    /// value in the `DropdownCornerRadius` property, ensuring the visual shape of the popup
+    /// is consistent with the designated styling.
+    /// This is needed as we can't bind to the Stroke in the dropdown.
+    /// </summary>
+    private void UpdateCornerRadius() {
+        ArgumentNullException.ThrowIfNull(_popupContainer);
+        _popupContainer.StrokeShape = new RoundRectangle { CornerRadius = DropdownCornerRadius };
+    }
+
     /// <summary>
     /// Updates the dropdown arrow image to reflect its open or closed state.
     /// </summary>
     /// <param name="isOpen">A boolean value indicating whether the dropdown is open (true) or closed (false).</param>
     private void SetDropDownImage(bool isOpen) {
         try {
-            arrowImage.Source = isOpen ? DropdownOpenImageSource : DropdownClosedImageSource;
+            _arrowImage.Source = isOpen ? DropdownOpenImageSource : DropdownClosedImageSource;
             if (DropdownImageTint != null) {
-                arrowImage.Behaviors.Add(new IconTintColorBehavior { TintColor = DropdownImageTint });
+                _arrowImage.Behaviors.Add(new IconTintColorBehavior { TintColor = DropdownImageTint });
             }
         } catch {
             Debug.WriteLine($"Error setting dropdown image source: {(isOpen ? DropdownOpenImageSource : DropdownClosedImageSource)}");
@@ -382,7 +395,7 @@ public class DropDownBox : ContentView, INotifyPropertyChanged {
     /// dropdown image based on its current visibility state.
     /// </summary>
     private void TogglePopup() {
-        popupContainer.IsVisible = !popupContainer.IsVisible;
-        SetDropDownImage(popupContainer.IsVisible);
+        _popupContainer.IsVisible = !_popupContainer.IsVisible;
+        SetDropDownImage(_popupContainer.IsVisible);
     }
 }
