@@ -36,7 +36,6 @@
                         DropdownCornerRadius="0"
                         DropdownBorderWidth="5"
                         DropDownWidth="400"
-                        DropDownHeight="-1"
                         DropdownClosedImageSource="chevron_circle_right.png"
                         DropdownOpenImageSource="chevron_circle_down.png"
                         DropdownBorderColor="DarkBlue"

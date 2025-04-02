@@ -1,24 +1,31 @@
 using System.Collections;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Behaviors;
+using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;
 using Microsoft.Maui.Controls.Shapes;
-using Microsoft.Maui.Layouts;
+using Application = Microsoft.Maui.Controls.Application;
+using LayoutAlignment = Microsoft.Maui.Primitives.LayoutAlignment;
 using ListView = Microsoft.Maui.Controls.ListView;
 
 namespace Maui.DropDown;
 
-public class DropDownBox : ContentView {
+public enum DropDownStyleEnum {Popup, Dropdown} 
+
+public class DropDownBox : ContentView, IDisposable {
+    private Popup? _popup;
+    private bool _disposed;
 
     private readonly Border _popupContainer = new Border();
     private Image _arrowImage = new Image();
-    
+
     public DropDownBox() {
         DrawDropDown();
     }
-    
+
     #region Bindable Properties
+    public static readonly BindableProperty DropDownStyleProperty = BindableProperty.Create(nameof(DropDownStyle), typeof(DropDownStyleEnum), typeof(DropDownBox), DropDownStyleEnum.Popup);
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(DropDownBox));
     public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(DropDownBox), null, BindingMode.TwoWay);
     public static readonly BindableProperty SelectedItemPathProperty = BindableProperty.Create(nameof(SelectedItemPath), typeof(string), typeof(DropDownBox));
@@ -37,6 +44,16 @@ public class DropDownBox : ContentView {
     public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(DropDownBox));
     public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(DropDownBox), true);
     public static readonly BindableProperty DropdownSeparatorProperty = BindableProperty.Create(nameof(DropdownSeparator), typeof(bool), typeof(DropDownBox), true);
+
+    /// <summary>
+    /// Specifies the visual behavior of the dropdown box. Determines whether the dropdown
+    /// opens as a popup or as a dropdown list. The available values are defined in the
+    /// DropDownStyleEnum enumeration.
+    /// </summary>
+    public DropDownStyleEnum DropDownStyle {
+        get => (DropDownStyleEnum)GetValue(DropDownStyleProperty);
+        set => SetValue(DropDownStyleProperty, value);
+    }
 
     /// <summary>
     /// The source of the dropdown list. This is either a collection of strings
@@ -207,13 +224,12 @@ public class DropDownBox : ContentView {
 
     public SeparatorVisibility DropdownSeparatorVisibility => DropdownSeparator ? SeparatorVisibility.Default : SeparatorVisibility.None;
     #endregion
-   
+
     /// <summary>
     /// Renders the dropdown menu, handling its visual update and ensuring
     /// that it is properly displayed within the parent container.
     /// </summary>
     private void DrawDropDown() {
-        
         // The label that will be displayed containing the selected item
         // ----------------------------------------------------------------------------
         var selectedItemLabel = new Label {
@@ -223,7 +239,7 @@ public class DropDownBox : ContentView {
         };
         selectedItemLabel.SetBinding(Label.TextColorProperty, new Binding(nameof(TextColor), BindingMode.OneWay, source: this));
         selectedItemLabel.SetBinding(Label.FontSizeProperty, new Binding(nameof(TextSize), BindingMode.OneWay, source: this));
-        
+
         // The up/down image. Use properties to change what .png is used. (must be PNG)  
         // ----------------------------------------------------------------------------
         _arrowImage = new Image {
@@ -243,10 +259,11 @@ public class DropDownBox : ContentView {
             VerticalOptions = LayoutOptions.Fill,
             HorizontalOptions = LayoutOptions.Fill,
         };
-        mainButtonLayout.SizeChanged += (_, _) => {
-            var dropdownWidth = DropDownWidth > 0 ? DropDownWidth-2 : mainButtonLayout.Width-2;
-            AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, mainButtonLayout.Height, dropdownWidth, DropDownHeight));
-        };
+
+        //mainButtonLayout.SizeChanged += (_, _) => {
+        //    var dropdownWidth = DropDownWidth > 0 ? DropDownWidth-2 : mainButtonLayout.Width-2;
+        //    AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, mainButtonLayout.Height, dropdownWidth, DropDownHeight));
+        //};
         mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
         mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         mainButtonLayout.Children.Add(selectedItemLabel);
@@ -263,7 +280,7 @@ public class DropDownBox : ContentView {
             SelectionMode = ListViewSelectionMode.Single,
             ItemTemplate = new DataTemplate(() => {
                 var label = new Label {
-                    Margin = new Thickness(5,0,5,0),
+                    Margin = new Thickness(5, 0, 5, 0),
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalOptions = LayoutOptions.Fill,
                 };
@@ -282,7 +299,7 @@ public class DropDownBox : ContentView {
         itemListView.ItemTapped += (_, e) => {
             if (e?.Item is { } item) {
                 SelectedItem = item;
-                _popupContainer.IsVisible = false; // Hide dropdown
+                TogglePopup();
                 SetDropDownImage(false);
             }
         };
@@ -292,24 +309,24 @@ public class DropDownBox : ContentView {
         _popupContainer.Content = itemListView;
         _popupContainer.IsVisible = false;
         _popupContainer.Margin = new Thickness(1);
-        _popupContainer.Padding= new Thickness(1);
+        _popupContainer.Padding = new Thickness(1);
         _popupContainer.SetBinding(Border.BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
         _popupContainer.SetBinding(Border.StrokeProperty, new Binding(nameof(DropdownBorderColorBrush), BindingMode.OneWay, source: this));
         _popupContainer.SetBinding(Border.StrokeThicknessProperty, new Binding(nameof(DropdownBorderWidth), BindingMode.OneWay, source: this));
-        _popupContainer.Unfocused += (_,_) => _popupContainer.IsVisible = false;
+        _popupContainer.Unfocused += (_, _) => _popupContainer.IsVisible = false;
 
         // AbsoluteLayout to allow overlay over other content
         // ----------------------------------------------------------------------------
-        var absoluteLayout = new AbsoluteLayout();
-        AbsoluteLayout.SetLayoutBounds(mainButtonLayout, new Rect(0, 0, 1, 40)); // Layout button at (0, 0)
-        AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
-        absoluteLayout.Children.Add(mainButtonLayout);
-        
-        AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth -2 : WidthRequest -2, DropDownHeight));
-        AbsoluteLayout.SetLayoutFlags(_popupContainer, AbsoluteLayoutFlags.None);
-        absoluteLayout.Children.Add(_popupContainer);
-        
-        Content = absoluteLayout;
+        // var absoluteLayout = new AbsoluteLayout();
+        // AbsoluteLayout.SetLayoutBounds(mainButtonLayout, new Rect(0, 0, 1, 40)); // Layout button at (0, 0)
+        // AbsoluteLayout.SetLayoutFlags(mainButtonLayout, AbsoluteLayoutFlags.WidthProportional);
+        // absoluteLayout.Children.Add(mainButtonLayout);
+        //
+        // AbsoluteLayout.SetLayoutBounds(_popupContainer, new Rect(0, 40, DropDownWidth > 0 ? DropDownWidth -2 : WidthRequest -2, DropDownHeight));
+        // AbsoluteLayout.SetLayoutFlags(_popupContainer, AbsoluteLayoutFlags.None);
+        // absoluteLayout.Children.Add(_popupContainer);
+        //
+        Content = mainButtonLayout; //absoluteLayout;
         selectedItemLabel.BindingContext = this;
         selectedItemLabel.SetBinding(Label.TextProperty, new Binding(nameof(SelectedItem), BindingMode.OneWay, source: this));
 
@@ -321,7 +338,7 @@ public class DropDownBox : ContentView {
             case nameof(Placeholder):
                 selectedItemLabel.Text = GetPropertyValue(SelectedItem, SelectedItemPath, Placeholder) as string ?? string.Empty;
                 break;
-            
+
             case nameof(DropdownSeparator):
                 OnPropertyChanged(nameof(DropdownSeparatorVisibility));
                 break;
@@ -329,7 +346,7 @@ public class DropDownBox : ContentView {
             case nameof(DropdownImageTint):
                 SetDropDownImage(_popupContainer.IsVisible);
                 break;
-            
+
             case nameof(DropdownShadow):
                 if (DropdownShadow) {
                     _popupContainer.Shadow = new Shadow {
@@ -342,7 +359,7 @@ public class DropDownBox : ContentView {
             }
         };
     }
-    
+
     /// <summary>
     /// Retrieves the value of a specified property from the given object based on
     /// the provided property path. If the value is null or the property path is invalid,
@@ -394,8 +411,82 @@ public class DropDownBox : ContentView {
     /// Toggles the visibility of the popup container and updates the associated
     /// dropdown image based on its current visibility state.
     /// </summary>
-    private void TogglePopup() {
+    private void TogglePopupOld() {
         _popupContainer.IsVisible = !_popupContainer.IsVisible;
         SetDropDownImage(_popupContainer.IsVisible);
+    }
+
+    private void TogglePopup() {
+        if (_popup?.Parent != null) {
+            // Hide popup
+            _popup.Close();
+            _popup = null;
+            _popupContainer.IsVisible = false;
+        } else {
+            // Create and show popup
+            var bounds = GetControlBounds();
+            _popupContainer.WidthRequest = DropDownWidth > 0 ? DropDownWidth - 2 : bounds.Width - 2;
+
+            _popup = new Popup {
+                Content = _popupContainer,
+                Size = new Size(_popupContainer.WidthRequest, DropDownHeight),
+                Color = Colors.Transparent, // Make the popup background transparent
+                CanBeDismissedByTappingOutsideOfPopup = true,
+                Anchor = this,
+                VerticalOptions = LayoutAlignment.Start,
+                HorizontalOptions = LayoutAlignment.Start,
+            };
+            Application.Current?.Windows[0].Page?.ShowPopup(_popup);
+            _popupContainer.IsVisible = true;
+        }
+        SetDropDownImage(_popupContainer.IsVisible);
+    }
+
+    private Rect GetControlBounds() {
+        var element = this;
+        var x = element.X;
+        var y = element.Y;
+
+        // Get absolute position by walking up the visual tree
+        var parent = element.Parent as Microsoft.Maui.Controls.VisualElement;
+        while (parent != null) {
+            x += parent.X;
+            y += parent.Y;
+            parent = parent.Parent as Microsoft.Maui.Controls.VisualElement;
+        }
+
+        return new Rect(x, y, Width, Height);
+    }
+
+    public void Dispose() {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing) {
+        if (!_disposed) {
+            if (disposing) {
+                _popup?.Close();
+                _popup = null;
+            }
+            _disposed = true;
+        }
+    }
+}
+
+public static class ViewExtensions {
+    public static Rect GetAbsoluteBounds(this IView view) {
+        var element = view as Microsoft.Maui.Controls.VisualElement;
+        var x = element?.X ?? 0;
+        var y = element?.Y ?? 0;
+
+        // Get absolute position by walking up the visual tree
+        var parent = element?.Parent as Microsoft.Maui.Controls.VisualElement;
+        while (parent != null) {
+            x += parent.X;
+            y += parent.Y;
+            parent = parent.Parent as Microsoft.Maui.Controls.VisualElement;
+        }
+        return new Rect(x, y, element?.Width ?? 0, element?.Height ?? 0);
     }
 }
