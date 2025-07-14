@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace Maui.DropDown;
+namespace Maui.Testing.ComboBox;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate {

@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.Maui.Controls.Xaml.Diagnostics;
-using static Microsoft.Maui.Controls.Xaml.Diagnostics.BindingDiagnostics;
 
-namespace Maui.DropDown;
+namespace Maui.Testing.ComboBox;
 
 public partial class App : Application {
     public App() {

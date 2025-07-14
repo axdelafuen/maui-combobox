@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace Maui.DropDown;
+namespace Maui.Testing.ComboBox;
 
 [Application]
 public class MainApplication : MauiApplication {

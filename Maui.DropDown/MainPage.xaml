@@ -2,9 +2,10 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:dropDown="clr-namespace:Maui.DropDown"
-             x:DataType="dropDown:MainPage"
-             x:Class="Maui.DropDown.MainPage">
+             xmlns:local="clr-namespace:Maui.Testing.ComboBox"
+             xmlns:custom_controls="clr-namespace:Maui.CustomControls"
+             x:DataType="local:MainPage"
+             x:Class="Maui.Testing.ComboBox.MainPage">
 
     <ScrollView>
         <VerticalStackLayout
@@ -26,96 +27,42 @@
             </Border>
 
             <Border WidthRequest="400">
-                <Grid RowDefinitions="30,300">
-                    <dropDown:PopUpListBox
-                        HorizontalOptions="Fill"
-                        VerticalOptions="Center"
-                        BackgroundColor="Transparent"
-                        TextColor="Black"
-                        TextSize="18"
-                        DropdownCornerRadius="0"
-                        DropdownBorderWidth="5"
-                        DropDownWidth="400"
-                        DropdownClosedImageSource="chevron_circle_right.png"
-                        DropdownOpenImageSource="chevron_circle_down.png"
-                        DropdownBorderColor="DarkBlue"
-                        DropdownBackgroundColor="LightGrey"
-                        DropdownTextColor="DarkBlue"
-                        DropdownImageTint="Green"
-                        DropdownShadow="{Binding ShowShadow}"
-                        DropdownSeparator="{Binding ShowSeparator}"
+                <custom_controls:ComboBox
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Center"
+                    BackgroundColor="Transparent"
+                    TextColor="Black"
+                    TextSize="18"
+                    DropdownCornerRadius="10"
+                    DropdownBorderWidth="5"
+                    DropDownWidth="400"
+                    DropdownClosedImageSource="chevron_circle_right.png"
+                    DropdownOpenImageSource="chevron_circle_down.png"
+                    DropdownBorderColor="DarkBlue"
+                    DropdownBackgroundColor="LightGrey"
+                    DropdownTextColor="DarkBlue"
+                    DropdownImageTint="Green"
+                    ItemsSource="{Binding ObjectItems}"
+                    SelectedItem="{Binding SelectedObjectItem}"
+                    Placeholder="Click for item"/>
+            </Border>
 
-                        ItemsSource="{Binding StringItems}"
-                        SelectedItem="{Binding SelectedStringItem}"
-                        Placeholder="Click for item"/>
+            <Border HorizontalOptions="Center" WidthRequest="400" Padding="10" Margin="10" StrokeThickness="2" BackgroundColor="WhiteSmoke">
+                <Grid HorizontalOptions="Center" ColumnDefinitions="75,300" RowDefinitions="40,40">
+                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="0" IsToggled="{Binding ShowSeparator}"></Switch>
+                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="0" Text="Show Dropdown Separators? "></Label>
+                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="1" IsToggled="{Binding ShowShadow}"></Switch>
+                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="1" Text="Show Dropdown Shadow? "></Label>
                 </Grid>
             </Border>
-            
-            <Border WidthRequest="400">
-                <Grid RowDefinitions="70">
-                    <dropDown:PopUpListBox
-                        HorizontalOptions="Fill"
-                        VerticalOptions="Center"
-                        BackgroundColor="Transparent"
-                        TextColor="Black"
-                        TextSize="18"
-                        DropdownCornerRadius="0"
-                        DropdownBorderWidth="5"
-                        DropDownWidth="400"
-                        DropDownHeight="300"
-                        DropdownClosedImageSource="chevron_circle_right.png"
-                        DropdownOpenImageSource="chevron_circle_down.png"
-                        DropdownBorderColor="DarkBlue"
-                        DropdownBackgroundColor="LightGrey"
-                        DropdownTextColor="DarkBlue"
-                        DropdownImageTint="Green"
-                        DropdownShadow="{Binding ShowShadow}"
-                        DropdownSeparator="{Binding ShowSeparator}"
-
-                        ItemsSource="{Binding ObjectItems}"
-                        SelectedItem="{Binding SelectedObjectItem}"
-                        Placeholder="Click for item"/>
+            <Border HorizontalOptions="Center" WidthRequest="400" Padding="10" Margin="10" StrokeThickness="2" BackgroundColor="WhiteSmoke">
+                <Grid HorizontalOptions="Center" ColumnDefinitions="75,300" RowDefinitions="40,40">
+                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="0" IsToggled="{Binding ShowSeparator}"></Switch>
+                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="0" Text="Show Dropdown Separators? "></Label>
+                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="1" IsToggled="{Binding ShowShadow}"></Switch>
+                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="1" Text="Show Dropdown Shadow? "></Label>
                 </Grid>
             </Border>
-            
-            <Border StrokeThickness="0" WidthRequest="300">
-            <dropDown:PopUpListBox
-                WidthRequest="300"
-                BackgroundColor="Transparent"
-                TextColor="Black"
-                TextSize="18"
-                DropdownCornerRadius="0"
-                DropdownBorderWidth="5"
-                DropDownWidth="200"
-                DropDownHeight="300"
-                DropdownClosedImageSource="chevron_circle_right.png"
-                DropdownOpenImageSource="chevron_circle_down.png"
-                DropdownBorderColor="DarkBlue"
-                DropdownBackgroundColor="LightGrey"
-                DropdownTextColor="DarkBlue"
-                DropdownImageTint="Green"
-                DropdownShadow="{Binding ShowShadow}"
-                DropdownSeparator="{Binding ShowSeparator}"
-                ItemsSource="{Binding StringItems}"
-                SelectedItem="{Binding SelectedStringItem}"
-                Placeholder="Click for item"/>
-            </Border>
-            
-            <dropDown:DropDownListBox
-                WidthRequest="300"
-                DropDownHeight="300"
-                DropdownBackgroundColor="LightBlue"
-                DropdownBorderColor="Black"
-                DropdownBorderWidth="2"
-                DropdownCornerRadius="0"
-                DropdownTextColor="Black"
-                BackgroundColor="Green"
-                TextColor="Black"
-                DropdownShadow="{Binding ShowShadow}"
-                DropdownSeparator="{Binding ShowSeparator}"
-                ItemsSource="{Binding ObjectItems }"
-                SelectedItem="{Binding SelectedObjectItem}"
-                Placeholder="Click for Drop Down Item"/>
 
         </VerticalStackLayout>
     </ScrollView>

@@ -2,7 +2,7 @@ using System;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace Maui.DropDown;
+namespace Maui.Testing.ComboBox;
 
 class Program : MauiApplication {
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
