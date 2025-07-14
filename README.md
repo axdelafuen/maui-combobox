@@ -1,5 +1,7 @@
 # Maui.ComboBox
 
+/!\ WIP /!\
+
 There is no * FREE * ComboBox available in .NET MAUI. 
 
 Here is a simple, responsive and customizable ComboBox. This project is mostly inspired by the project : [Maui.DropDown](https://github.com/trevleyb/Maui.DropDown). (I felt that the inital project is most like a 'Picker' for the ComboBox and an 'Expander' for the 'DropDown', this is why I developped my own ComboBox).
