@@ -9,8 +9,8 @@ using ScrollView = Microsoft.Maui.Controls.ScrollView;
 using VisualElement = Microsoft.Maui.Controls.VisualElement;
 
 /*
- * This ComboBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.Testing.ComboBox
- * This project is under MIT License. Refer to: https://github.com/trevleyb/Maui.Testing.ComboBox/blob/main/LICENSE
+ * This ComboBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
+ * This project is under MIT License. Refer to: https://github.com/trevleyb/Maui.DropDown/blob/main/LICENSE
  */
 
 namespace Maui.CustomControls
