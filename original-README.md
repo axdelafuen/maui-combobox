@@ -1,26 +1,46 @@
-# Maui.ComboBox
+# Maui.DropDown
 
-There is no * FREE * ComboBox available in .NET MAUI. 
+Building a .net Maui application and I needed something that was not a picker 
+and that would allow me to select data. 
 
-Here is a simple, responsive and customizable ComboBox. This project is mostly inspired by the project : [Maui.DropDown](https://github.com/trevleyb/Maui.DropDown). (I felt that the inital project is most like a 'Picker' for the ComboBox and an 'Expander' for the 'DropDown', this is why I developped my own ComboBox).
+There is no DropDown or ComboBox available in .net Maui 
+as you would normally use the 'Picker' controls as this is normal for iOS, 
+but the Picker does not seem to work well on MacCatalyst and there are 
+issues with the current Picker implementation. 
 
-## Getting started
+So I built a simple DropDown control. Feel free to use as you see fit.
+
+There is a base class called DropDownBoxBase which defines the behaviour and 
+two derived classes, DropDownListBox and PopUpListBox which just set the style
+of the list box. It is either **Popup** — which pops up an overlay or **DropDown**
+which drops down a list. 
+
+There is a current issue with the dropdown. It is constrained by it parent. 
+So if the control is in a grid, then the dropdown absolute cannot expand outside
+the bounds of the grid (which is why I support a PopUp). If someone can fix 
+this, great. It would be good if it overlayed other controls on the page. 
 
 Key points:
 
 1. If you ar using an Object as the ItemsSource collection then it should implement ToString() to display the correct item.  
 2. You need to copy or override the .svg images for the drop down images. 
 
-To use this control, copy the code (sorry no NuGet right now) and add it to your Xaml:
+To use this control, copy the code (sorry no NuGet) and add it to your Xaml:
 
-```xaml
-xmlns:controls="clr-namespace:Your.Path.To.The.Controls"
+```
+<dropDown:PopUpListBox   
+    ItemsSource="{Binding StringItems}"
+    SelectedItem="{Binding SelectedStringItem}"
+    Placeholder="Click for item"
+/>
 ```
 
-```xaml
-<controls:ComboBox   
-    ItemsSource="{Binding ItemsSource}"
-    SelectedItem="{Binding SelectedItem}"
+or:
+
+```
+<dropDown:DropDownListBox
+    ItemsSource="{Binding StringItems}"
+    SelectedItem="{Binding SelectedStringItem}"
     Placeholder="Click for item"
 />
 ```
@@ -45,10 +65,3 @@ Other properties include:
     DropdownShadow            : Draw a shadow on the dropdown
     DropdownSeparator         : Show separators between items in the dropdown
 
-## Author
-
-- [axdelafuen](https://github.com/axdelafuen)
-
-## Acknowledgment
-
-Thanks to [trevleyb](https://github.com/trevleyb) for his work that helped me a lot for starting this project.
