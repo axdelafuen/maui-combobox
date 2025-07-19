@@ -3,13 +3,13 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Maui.Testing.ComboBox"
-             xmlns:custom_controls="clr-namespace:Maui.CustomControls"
+             xmlns:custom_controls="clr-namespace:Maui.ComboBox"
              x:DataType="local:MainPage"
              x:Class="Maui.Testing.ComboBox.MainPage">
 
     <ScrollView>
         <VerticalStackLayout
-            Padding="30,0"
+            Padding="50,0"
             Spacing="25">
 
             <Label
@@ -17,54 +17,101 @@
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1"/>
 
-            <Border HorizontalOptions="Center" WidthRequest="400" Padding="10" Margin="10" StrokeThickness="2" BackgroundColor="WhiteSmoke">
-                <Grid HorizontalOptions="Center" ColumnDefinitions="75,300" RowDefinitions="40,40">
-                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="0" IsToggled="{Binding ShowSeparator}"></Switch>
-                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="0" Text="Show Dropdown Separators? "></Label>
-                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="1" IsToggled="{Binding ShowShadow}"></Switch>
-                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="1" Text="Show Dropdown Shadow? "></Label>
-                </Grid>
-            </Border>
-
-            <Border WidthRequest="400">
+            <Border
+                    Padding="0"
+                    Margin="5,10,10,10"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 3,3,3,3">
                 <custom_controls:ComboBox
-                    HorizontalOptions="Fill"
-                    VerticalOptions="Center"
-                    BackgroundColor="Transparent"
-                    TextColor="Black"
-                    TextSize="18"
-                    DropdownCornerRadius="10"
-                    DropdownBorderWidth="5"
-                    DropDownWidth="400"
-                    DropdownClosedImageSource="chevron_circle_right.png"
-                    DropdownOpenImageSource="chevron_circle_down.png"
-                    DropdownBorderColor="DarkBlue"
-                    DropdownBackgroundColor="LightGrey"
-                    DropdownTextColor="DarkBlue"
-                    DropdownImageTint="Green"
-                    ItemsSource="{Binding ObjectItems}"
-                    SelectedItem="{Binding SelectedObjectItem}"
-                    Placeholder="Click for item"/>
+                        BackgroundColor="White"
+                        DropdownCornerRadius="5"
+                        TextSize="15"
+                        DropdownClosedImageSource="chevron_right.png"
+                        DropdownOpenImageSource="chevron_down.png"
+                        DropdownBackgroundColor="White"
+                        DropdownShadow="False"
+                        Placeholder="Select item"
+                        DropdownImageTint="Red"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
             </Border>
 
-            <Border HorizontalOptions="Center" WidthRequest="400" Padding="10" Margin="10" StrokeThickness="2" BackgroundColor="WhiteSmoke">
-                <Grid HorizontalOptions="Center" ColumnDefinitions="75,300" RowDefinitions="40,40">
-                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="0" IsToggled="{Binding ShowSeparator}"></Switch>
-                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="0" Text="Show Dropdown Separators? "></Label>
-                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="1" IsToggled="{Binding ShowShadow}"></Switch>
-                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="1" Text="Show Dropdown Shadow? "></Label>
-                </Grid>
-            </Border>
-            <Border HorizontalOptions="Center" WidthRequest="400" Padding="10" Margin="10" StrokeThickness="2" BackgroundColor="WhiteSmoke">
-                <Grid HorizontalOptions="Center" ColumnDefinitions="75,300" RowDefinitions="40,40">
-                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="0" IsToggled="{Binding ShowSeparator}"></Switch>
-                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="0" Text="Show Dropdown Separators? "></Label>
-                    <Switch VerticalOptions="Center" Grid.Column="0" Grid.Row="1" IsToggled="{Binding ShowShadow}"></Switch>
-                    <Label VerticalOptions="Center" Grid.Column="1" Grid.Row="1" Text="Show Dropdown Shadow? "></Label>
-                </Grid>
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Border
+                    Padding="0"
+                    Margin="5,20,20,20"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 3,3,3,3">
+                <custom_controls:ComboBox
+                        BackgroundColor="Green"
+                        DropdownBackgroundColor="Green"
+                        DropdownCornerRadius="5"
+                        TextSize="15"
+                        TextColor="White"
+                        DropdownTextColor="White"
+                        DropdownClosedImageSource="chevron_right.png"
+                        DropdownOpenImageSource="chevron_down.png"
+                        DropdownBorderWidth="0"
+                        DropdownShadow="False"
+                        Placeholder="Select item"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
             </Border>
 
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Border
+                    Padding="0"
+                    Margin="5,10,10,10"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 3,3,3,3">
+                <custom_controls:ComboBox
+                        BackgroundColor="White"
+                        DropdownCornerRadius="5"
+                        TextSize="25"
+                        TextColor="Blue"
+                        DropdownTextColor="Blue"
+                        DropdownClosedImageSource="chevron_right.png"
+                        DropdownOpenImageSource="chevron_down.png"
+                        DropdownBorderWidth="0"
+                        DropdownBackgroundColor="White"
+                        DropdownShadow="False"
+                        DropDownWidth="200"
+                        DropDownHeight="100"
+                        Placeholder="Select item"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
+            </Border>
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>

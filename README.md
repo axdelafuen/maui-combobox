@@ -45,7 +45,6 @@ Other properties include:
     DropdownOpenImageSource   : Image when dropdown is open V 
     DropdownImageTint         : Image Tint - if you overwrite background, this changes the image color
     DropdownShadow            : Draw a shadow on the dropdown
-    DropdownSeparator         : Show separators between items in the dropdown
 
 ## Author
 

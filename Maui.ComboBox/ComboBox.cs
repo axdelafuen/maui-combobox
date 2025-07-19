@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Behaviors;
 using CommunityToolkit.Maui.Extensions;
 using CommunityToolkit.Maui.Views;
@@ -9,11 +10,11 @@ using ScrollView = Microsoft.Maui.Controls.ScrollView;
 using VisualElement = Microsoft.Maui.Controls.VisualElement;
 
 /*
- * This ComboBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
+ * This DropDownBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
  * This project is under MIT License. Refer to: https://github.com/trevleyb/Maui.DropDown/blob/main/LICENSE
  */
 
-namespace Maui.CustomControls
+namespace Maui.ComboBox
 {
     public class ComboBox : ContentView, IDisposable
     {
@@ -39,13 +40,12 @@ namespace Maui.CustomControls
         public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(ComboBox), new CornerRadius(0), propertyChanged: CornerRadiusChanged);
         public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(ComboBox), Colors.Black);
         public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(ComboBox), Colors.White);
-        public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(ComboBox), Colors.White);
-        public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(ComboBox), 1.0);
+        public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(ComboBox), Colors.Transparent);
+        public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(ComboBox), 0.0);
         public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(ComboBox), "chevron_right.png");
         public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(ComboBox), "chevron_down.png");
         public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(ComboBox));
         public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(ComboBox), true);
-        public static readonly BindableProperty DropdownSeparatorProperty = BindableProperty.Create(nameof(DropdownSeparator), typeof(bool), typeof(ComboBox), true);
 
         /// <summary>
         /// The source of the dropdown list. This is either a collection of strings
@@ -213,16 +213,6 @@ namespace Maui.CustomControls
             set => SetValue(DropdownShadowProperty, value);
         }
 
-        /// <summary>
-        /// Indicates whether a separator is displayed within the dropdown.
-        /// </summary>
-        public bool DropdownSeparator
-        {
-            get => (bool)GetValue(DropdownSeparatorProperty);
-            set => SetValue(DropdownSeparatorProperty, value);
-        }
-
-        public SeparatorVisibility DropdownSeparatorVisibility => DropdownSeparator ? SeparatorVisibility.Default : SeparatorVisibility.None;
         #endregion
 
         /// <summary>
@@ -235,12 +225,15 @@ namespace Maui.CustomControls
             // ----------------------------------------------------------------------------
             var selectedItemLabel = new Label
             {
+                FontAttributes = FontAttributes.Bold,
                 VerticalOptions = LayoutOptions.Center,
                 VerticalTextAlignment = TextAlignment.Center,
                 LineBreakMode = LineBreakMode.TailTruncation,
             };
             selectedItemLabel.SetBinding(Label.TextColorProperty, new Binding(nameof(TextColor), BindingMode.OneWay, source: this));
             selectedItemLabel.SetBinding(Label.FontSizeProperty, new Binding(nameof(TextSize), BindingMode.OneWay, source: this));
+            selectedItemLabel.SetBinding(Label.TextProperty, new Binding(nameof(SelectedItem), BindingMode.OneWay, source: this));
+            selectedItemLabel.BindingContext = this;
 
             // The up/down image. Use properties to change what .png is used. (must be PNG)  
             // ----------------------------------------------------------------------------
@@ -251,10 +244,6 @@ namespace Maui.CustomControls
                 VerticalOptions = LayoutOptions.Center,
                 Margin = new Thickness(0),
             };
-            var togglePopupGesture = new TapGestureRecognizer();
-            togglePopupGesture.Tapped += (_, _) => TogglePopup();
-            selectedItemLabel.GestureRecognizers.Add(togglePopupGesture);
-            _arrowImage.GestureRecognizers.Add(togglePopupGesture);
 
             // Main container for the label and icon
             // ----------------------------------------------------------------------------
@@ -297,14 +286,14 @@ namespace Maui.CustomControls
 
                     var boxView = new BoxView
                     {
-                        Margin = new Thickness(0, 0, 0, 10),
+                        Margin = new Thickness(0, 10, 0, 0),
                         Color = Colors.LightGray,
                         HeightRequest = .5
                     };
 
                     var label = new Label
                     {
-                        Margin = new Thickness(5, 0, 5, 0),
+                        Margin = new Thickness(10, 10, 10, 0),
                         VerticalOptions = LayoutOptions.Center,
                         HorizontalOptions = LayoutOptions.Fill,
                     };
@@ -313,20 +302,28 @@ namespace Maui.CustomControls
                     label.SetBinding(BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
                     label.SetBinding(Label.TextProperty, new Binding("."));
 
-                    grid.SetRow(label, 1);
+                    grid.SetRow(boxView, 1);
                     grid.Children.Add(boxView);
                     grid.Children.Add(label);
 
                     return grid;
                 }),
+                EmptyView = new Label
+                {
+                    Text = "No object found...",
+                    TextColor = Colors.Gray,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Margin = new Thickness(0, 10),
+                }
             };
             itemCollectionView.SetBinding(CollectionView.ItemsSourceProperty, new Binding(nameof(ItemsSource), source: this));
             itemCollectionView.SetBinding(BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
             itemCollectionView.SelectionChanged += (_, e) =>
             {
-                if (e?.CurrentSelection is { } item)
+                if (e?.CurrentSelection is { } item && e?.CurrentSelection.Count > 0)
                 {
                     SelectedItem = item.First();
+                    itemCollectionView.SelectedItem = null;
                     TogglePopup();
                 }
             };
@@ -344,11 +341,16 @@ namespace Maui.CustomControls
 
             _popupContainer.Unfocused += (_, _) => _popupContainer.IsVisible = false;
 
-            // AbsoluteLayout to allow overlay over other content
+            // Add main button to content view
             // ----------------------------------------------------------------------------
             Content = mainButtonLayout;
-            selectedItemLabel.BindingContext = this;
-            selectedItemLabel.SetBinding(Label.TextProperty, new Binding(nameof(SelectedItem), BindingMode.OneWay, source: this));
+            Padding = new Thickness(10);
+
+            // Declare and add gesture recognition to toggle the popup
+            // ----------------------------------------------------------------------------
+            var togglePopupGesture = new TapGestureRecognizer();
+            togglePopupGesture.Tapped += (_, _) => TogglePopup();
+            GestureRecognizers.Add(togglePopupGesture);
 
             // Placeholder management
             // ----------------------------------------------------------------------------
@@ -356,12 +358,12 @@ namespace Maui.CustomControls
             {
                 switch (e.PropertyName)
                 {
-                    case nameof(Placeholder):
+                    case nameof(SelectedItem):
                         selectedItemLabel.Text = SelectedItem?.ToString() ?? Placeholder ?? string.Empty; ;
                         break;
 
-                    case nameof(DropdownSeparator):
-                        OnPropertyChanged(nameof(DropdownSeparatorVisibility));
+                    case nameof(Placeholder):
+                        selectedItemLabel.Text = SelectedItem?.ToString() ?? Placeholder ?? string.Empty; ;
                         break;
 
                     case nameof(DropdownImageTint):
@@ -375,7 +377,7 @@ namespace Maui.CustomControls
                             {
                                 Opacity = 0.25f,
                                 Offset = new Point(5, 5),
-                                Radius = 10
+                                Radius = 1
                             };
                         }
                         else _popupContainer.Shadow = null!;
@@ -468,7 +470,9 @@ namespace Maui.CustomControls
                     WidthRequest = popupWidth,
                     HeightRequest = popupHeight,
                     CanBeDismissedByTappingOutsideOfPopup = true,
-                    Margin = new Thickness(bounds.X - bounds.X / 2, (bounds.Y * 0.5) + (bounds.Height * 1.75) - scrollOffset, 0, 0),
+                    // The 0.5 numbers are used to add an offset, of half the size the control, to the popup is not placed over the header button
+                    Margin = new Thickness(bounds.X * 0.5, bounds.Y * 0.5 + bounds.Height - scrollOffset, 0, 0),
+                    Padding = 0,
                     VerticalOptions = LayoutOptions.Start,
                     HorizontalOptions = LayoutOptions.Start,
                     BackgroundColor = Colors.Transparent
@@ -480,7 +484,15 @@ namespace Maui.CustomControls
                     SetDropDownImage(_popupContainer.IsVisible);
                     _popup = null;
                 };
-                Application.Current?.Windows[0].Page?.ShowPopup(_popup);
+                Application.Current?.Windows[0].Page?.ShowPopup(_popup, new PopupOptions
+                {
+                    PageOverlayColor = Colors.Transparent,
+                    Shape = new Rectangle
+                    {
+                        StrokeThickness = 0,
+                        Stroke = Colors.Transparent
+                    }
+                });
                 _popupContainer.IsVisible = true;
             }
             SetDropDownImage(_popupContainer.IsVisible);
