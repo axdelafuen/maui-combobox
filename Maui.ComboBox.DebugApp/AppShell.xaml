@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Maui.ComboBox.DebugApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Maui.ComboBox.DebugApp"
+    x:DataType="local:AppShell"
+    Shell.FlyoutBehavior="Flyout"
+    Title="Maui ComboBox Test">
+
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+
+    <ShellContent
+        Title="SubPage"
+        ContentTemplate="{DataTemplate local:SubPage}"
+        Route="SubPage" />
+
+</Shell>
