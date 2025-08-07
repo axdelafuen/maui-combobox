@@ -26,6 +26,7 @@
                         DropdownCornerRadius="5"
                         TextSize="15"
                         DropdownClosedImageSource="gear.svg"
+                        DropdownOpenImageSource="gear.svg"
                         DropdownBackgroundColor="White"
                         DropdownShadow="False"
                         Placeholder="Select item"
