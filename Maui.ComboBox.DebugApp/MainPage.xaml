@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Maui.ComboBox.DebugApp"
+             xmlns:controls="clr-namespace:Maui.ComboBox;assembly=Maui.ComboBox.Lib"
+             x:DataType="local:MainPage"
+             x:Class="Maui.ComboBox.DebugApp.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="50,0"
+            Spacing="25">
+            
+            <Label
+                Text="ComboBox Control Test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Border
+                    Padding="0"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 3,3,3,3">
+                <controls:ComboBox
+                        BackgroundColor="White"
+                        DropdownCornerRadius="5"
+                        TextSize="15"
+                        DropdownClosedImageSource="gear.svg"
+                        DropdownBackgroundColor="White"
+                        DropdownShadow="False"
+                        Placeholder="Select item"
+                        DropdownImageTint="Red"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
+            </Border>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Button
+                Text="Go to new sub page"
+                Clicked="Button_Clicked"
+                ></Button>
+            <Border
+                    Padding="0"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 3,3,3,3">
+                <controls:ComboBox
+                        BackgroundColor="Green"
+                        DropdownBackgroundColor="Green"
+                        DropdownCornerRadius="5"
+                        TextSize="15"
+                        TextColor="White"
+                        DropdownTextColor="White"
+                        DropdownBorderWidth="0"
+                        DropdownShadow="False"
+                        Placeholder="Select item"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
+            </Border>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+
+            <Border
+                    Padding="0"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 3,3,3,3">
+                <controls:ComboBox
+                        BackgroundColor="White"
+                        DropdownCornerRadius="5"
+                        TextSize="25"
+                        TextColor="Blue"
+                        DropdownTextColor="Blue"
+                        DropdownBorderWidth="0"
+                        DropdownBackgroundColor="White"
+                        DropdownShadow="False"
+                        DropDownWidth="200"
+                        DropDownHeight="100"
+                        Placeholder="Select item"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
+            </Border>
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

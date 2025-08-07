@@ -1,7 +1,5 @@
 # Maui.ComboBox
 
-/!\ WIP /!\
-
 There is no * FREE * ComboBox available in .NET MAUI. 
 
 Here is a simple, responsive and customizable ComboBox. This project is mostly inspired by the project : [Maui.DropDown](https://github.com/trevleyb/Maui.DropDown). (I felt that the inital project is most like a 'Picker' for the ComboBox and an 'Expander' for the 'DropDown', this is why I developped my own ComboBox).
@@ -10,13 +8,14 @@ Here is a simple, responsive and customizable ComboBox. This project is mostly i
 
 Key points:
 
-1. If you ar using an Object as the ItemsSource collection then it should implement ToString() to display the correct item.  
-2. You need to copy or override the .svg images for the drop down images. 
+If you ar using an Object as the ItemsSource collection then it should implement ToString() to display the correct item.  
 
 To use this control, copy the code (sorry no NuGet right now) and add it to your Xaml:
 
+To use custom Open and Close icons, it is recommended to use SVGs for a better fit.
+
 ```xaml
-xmlns:controls="clr-namespace:Your.Path.To.The.Controls"
+xmlns:controls="clr-namespace:Namespace.Of.The.Control"
 ```
 
 ```xaml
