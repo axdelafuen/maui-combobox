@@ -10,7 +10,11 @@ namespace Maui.ComboBox.DebugApp
         public TestItem? SelectedObjectItem { get; set; }
 
         public ObservableCollection<TestItem> ObjectItems => StubedModel.GetItems().ToObservableCollection();
-        
+
+        public string? SelectedStringItem { get; set; }
+
+        public ObservableCollection<string> StringItems => StubedString.GetItems().ToObservableCollection();
+
         public MainPage()
         {
             InitializeComponent();

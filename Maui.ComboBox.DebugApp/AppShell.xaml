@@ -19,4 +19,8 @@
         ContentTemplate="{DataTemplate samples:PopupComboBoxSamplePage}"
         Route="PopupComboBox" />
 
+    <ShellContent
+        Title="CanvaComboBox"
+        ContentTemplate="{DataTemplate samples:CanvaComboBoxSamplePage}"
+        Route="CanvaComboBox" />
 </Shell>

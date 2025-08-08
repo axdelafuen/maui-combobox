@@ -1,33 +1,86 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Maui.ComboBox.Lib.Helpers;
+using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace Maui.ComboBox
 {
-    public partial class DropdownItem
+    public class GridComboBox : ContentView
     {
-        public string TranslateKey = string.Empty;
+        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(ICollection), typeof(Dropdown));
+        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(PopupComboBox), null, BindingMode.TwoWay);
 
-        public string MaterialIcon = string.Empty;
-    }
+        public ICollection ItemsSource
+        {
+            get => (ICollection)GetValue(ItemsSourceProperty);
+            set => SetValue(ItemsSourceProperty, value);
+        }
 
-    public class DropdownEventArgs : EventArgs
-    {
-        public DropdownItem? SelectedItem { get; set; } = null;
+        public object SelectedItem
+        {
+            get => GetValue(SelectedItemProperty);
+            set => SetValue(SelectedItemProperty, value);
+        }
+
+        private readonly Dropdown _dropdown;
+        private readonly Label _header;
+        private readonly Grid _container;
+
+        public GridComboBox()
+        {
+            _dropdown = new()
+            {
+                IsVisible = false,
+                ZIndex = 10,
+            };
+            _dropdown.SetBinding(Dropdown.ItemsSourceProperty, new Binding(nameof(ItemsSource), source: this));
+            _dropdown.SetBinding(Dropdown.SelectedItemProperty, new Binding(nameof(SelectedItem), source: this));
+            
+            _header = new Label { 
+                Text = "Select item...",
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
+            };
+            var gestuerRecognize = new TapGestureRecognizer();
+            gestuerRecognize.Tapped +=  (_, _) => 
+            {
+                _dropdown.IsVisible = !_dropdown.IsVisible;
+            };
+            _header.GestureRecognizers.Add(gestuerRecognize);
+
+            _container = new Grid()
+            {
+                RowDefinitions = new RowDefinitionCollection(
+                    new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = GridLength.Auto }
+                ),
+                Padding = new Thickness(8),
+                BackgroundColor = Colors.LightGray
+            };
+            _container.Children.Add(_header);
+            _container.Children.Add(_dropdown);
+
+            _container.SetRow(_header, 0);
+            _container.SetRow(_dropdown, 1);
+
+            Content = _container;
+        }
     }
 
     public class Dropdown : Border
     {
-        public event EventHandler<DropdownEventArgs>? SelectedItem;
-
-        public static readonly BindableProperty ItemsProperty = BindableProperty.Create(
-            nameof(Items),
-            typeof(List<DropdownItem>),
-            typeof(Dropdown),
-            new List<DropdownItem>()
-        );
-        public List<DropdownItem> Items
+        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(ICollection), typeof(Dropdown));
+        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(Dropdown), null, BindingMode.TwoWay);
+        
+        public ICollection ItemsSource
         {
-            get => (List<DropdownItem>)GetValue(ItemsProperty);
-            set => SetValue(ItemsProperty, value);
+            get => (ICollection)GetValue(ItemsSourceProperty);
+            set => SetValue(ItemsSourceProperty, value);
+        }
+
+        public object SelectedItem
+        {
+            get => GetValue(SelectedItemProperty);
+            set => SetValue(SelectedItemProperty, value);
         }
 
         private readonly VerticalStackLayout _ContentLayout = new VerticalStackLayout();
@@ -40,7 +93,7 @@ namespace Maui.ComboBox
         protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             base.OnPropertyChanged(propertyName);
-            if (propertyName == ItemsProperty.PropertyName)
+            if (propertyName == ItemsSourceProperty.PropertyName)
             {
                 LayoutItems();
             }
@@ -52,30 +105,26 @@ namespace Maui.ComboBox
 
             _ContentLayout.Clear();
 
-            if (Items == null) return;
+            if (ItemsSource == null) return;
 
-            for (int i = 0; i < Items.Count; i++)
+            for (int i = 0; i < ItemsSource.Count; i++)
             {
                 var dropdownItem = new DropdownItemControl();
-                dropdownItem.BindingContext = Items[i];
-                dropdownItem.SetBinding(DropdownItemControl.TranslateKeyProperty, nameof(DropdownItem.TranslateKey));
-                dropdownItem.SetBinding(DropdownItemControl.MaterialIconProperty, nameof(DropdownItem.MaterialIcon));
+                dropdownItem.BindingContext = CollectionHelper.GetItemAt(ItemsSource, i);
+                dropdownItem.SetBinding(DropdownItemControl.TextProperty, ".");
                 
                 var gestureRecognizer = new TapGestureRecognizer();
                 gestureRecognizer.Tapped += (s, e) => {
-                    if (s is DropdownItemControl control && control.BindingContext is DropdownItem item)
+                    if (s is DropdownItemControl control && control.BindingContext is object item)
                     {
-                        SelectedItem?.Invoke(this, new DropdownEventArgs
-                        {
-                            SelectedItem = item,
-                        });
+                        SelectedItem = item;
                     }
                 };
                 dropdownItem.GestureRecognizers.Add(gestureRecognizer);
 
                 _ContentLayout.Add(dropdownItem);
 
-                if (i < (Items.Count - 1))
+                if (i < (ItemsSource.Count - 1))
                 {
                     _ContentLayout.Add(new BoxView());
                 }
@@ -83,33 +132,16 @@ namespace Maui.ComboBox
         }
     }
 
-
     public class DropdownItemControl : Grid
     {
         public event EventHandler? Tapped;
 
-        public static readonly BindableProperty TranslateKeyProperty = BindableProperty.Create(
-            nameof(TranslateKey),
-            typeof(string),
-            typeof(DropdownItemControl),
-            string.Empty
-        );
-        public string TranslateKey
-        {
-            get => (string)GetValue(TranslateKeyProperty);
-            set => SetValue(TranslateKeyProperty, value);
-        }
+        public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(DropdownItemControl), string.Empty);
 
-        public static readonly BindableProperty MaterialIconProperty = BindableProperty.Create(
-            nameof(MaterialIcon),
-            typeof(string),
-            typeof(DropdownItemControl),
-            string.Empty
-        );
-        public string MaterialIcon
+        public string Text
         {
-            get => (string)GetValue(MaterialIconProperty);
-            set => SetValue(MaterialIconProperty, value);
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
         }
 
         private readonly Label _Label = new Label
@@ -119,28 +151,16 @@ namespace Maui.ComboBox
             VerticalTextAlignment = TextAlignment.Center
         };
 
-        private readonly Label _Icon = new Label
-        {
-            Padding = new Thickness(8, 0, 0, 0),
-            FontSize = 24,
-            FontFamily = nameof(MaterialIcon),
-            HorizontalTextAlignment = TextAlignment.Center,
-            VerticalTextAlignment = TextAlignment.Center
-        };
-
         public DropdownItemControl()
         {
             ColumnDefinitions = new ColumnDefinitionCollection(
-                new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = GridLength.Star }
+                new ColumnDefinition { Width = GridLength.Auto }
             );
 
             ColumnSpacing = 8;
 
-            Children.Add(_Icon);
             Children.Add(_Label);
-            this.SetColumn(_Icon, 0);
-            this.SetColumn(_Label, 1);
+            this.SetColumn(_Label, 0);
 
             var gestureRecognizer = new TapGestureRecognizer();
             gestureRecognizer.Tapped += (s, e) => Tapped?.Invoke(this, EventArgs.Empty);
@@ -150,9 +170,9 @@ namespace Maui.ComboBox
         protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             base.OnPropertyChanged(propertyName);
-            if (propertyName == TranslateKeyProperty.PropertyName)
+            if (propertyName == TextProperty.PropertyName)
             {
-                _Label.Text = TranslateKey;
+                _Label.Text = Text;
             }
         }
     }

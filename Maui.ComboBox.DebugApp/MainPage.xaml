@@ -35,8 +35,9 @@
                 DropDownBackgroundColor="White"/>
 
             <Label Text="GridComboBox"/>
-            <controls:Dropdown
-                Items="{Binding ObjectItems}"/>
+            <controls:GridComboBox
+                ItemsSource="{Binding StringItems}"
+                SelectedItem="{Binding SelectedStringItem}"/>
             
         </VerticalStackLayout>
     </ScrollView>
