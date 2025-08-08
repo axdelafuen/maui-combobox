@@ -1,22 +1,22 @@
-﻿using System.Collections;
-using System.Diagnostics;
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Behaviors;
 using CommunityToolkit.Maui.Extensions;
 using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls.Shapes;
+using System.Collections;
+using System.Diagnostics;
 using Application = Microsoft.Maui.Controls.Application;
 using ScrollView = Microsoft.Maui.Controls.ScrollView;
 using VisualElement = Microsoft.Maui.Controls.VisualElement;
 
 /*
- * This DropDownBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
+ * This ComboBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
  * This project is under MIT License. Refer to: https://github.com/trevleyb/Maui.DropDown/blob/main/LICENSE
  */
 
 namespace Maui.ComboBox
 {
-    public partial class ComboBox : ContentView, IDisposable
+    public partial class PopupComboBox : ContentView, IDisposable
     {
         private Popup? _popup;
         private bool _disposed;
@@ -24,28 +24,33 @@ namespace Maui.ComboBox
         private readonly Border _popupContainer = new();
         private Image _arrowImage = new();
 
-        public ComboBox()
+        private bool _isToggling = false;
+
+        public PopupComboBox()
         {
-            DrawDropDown();
+            HandlePopupComboBox();
         }
 
         #region Bindable Properties
-        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(ComboBox));
-        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(ComboBox), null, BindingMode.TwoWay);
-        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(ComboBox), string.Empty);
-        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(ComboBox), Colors.Black);
-        public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(ComboBox), 12.0);
-        public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(ComboBox), -1.0);
-        public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(ComboBox), 200.0);
-        public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(ComboBox), new CornerRadius(0), propertyChanged: CornerRadiusChanged);
-        public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(ComboBox), Colors.Black);
-        public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(ComboBox), Colors.White);
-        public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(ComboBox), Colors.Transparent);
-        public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(ComboBox), 0.0);
-        public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(ComboBox), "chevron_right.svg");
-        public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(ComboBox), "chevron_down.svg");
-        public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(ComboBox));
-        public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(ComboBox), true);
+        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(PopupComboBox));
+        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(PopupComboBox), null, BindingMode.TwoWay);
+        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(PopupComboBox), string.Empty);
+        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(PopupComboBox), Colors.Black);
+        public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(PopupComboBox), 12.0);
+        public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(PopupComboBox), -1.0);
+        public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(PopupComboBox), 200.0);
+        public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(PopupComboBox), new CornerRadius(0), propertyChanged: CornerRadiusChanged);
+        public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(PopupComboBox), Colors.Black);
+        public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(PopupComboBox), Colors.White);
+        public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(PopupComboBox), Colors.Transparent);
+        public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(PopupComboBox), 0.0);
+        public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(PopupComboBox), "chevron_right.svg");
+        public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(PopupComboBox), "chevron_down.svg");
+        public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(PopupComboBox));
+        public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(PopupComboBox), true);
+        #endregion
+
+        #region Attributes
 
         /// <summary>
         /// The source of the dropdown list. This is either a collection of strings
@@ -151,7 +156,7 @@ namespace Maui.ComboBox
         /// Represents a brush that is derived from the <c>DropdownBorderColor</c> property,
         /// used to define the border color as a solid brush for the dropdown box.
         /// </summary>
-        public SolidColorBrush DropdownBorderColorBrush => new SolidColorBrush(DropdownBorderColor);
+        public SolidColorBrush DropdownBorderColorBrush => new(DropdownBorderColor);
 
         /// <summary>
         /// Gets or sets the width of the border surrounding the dropdown.
@@ -216,10 +221,10 @@ namespace Maui.ComboBox
         #endregion
 
         /// <summary>
-        /// Renders the dropdown menu, handling its visual update and ensuring
+        /// Renders the PopupComboBox menu, handling its visual update and ensuring
         /// that it is properly displayed within the parent container.
         /// </summary>
-        private void DrawDropDown()
+        private void HandlePopupComboBox()
         {
             // The label that will be displayed containing the selected item
             // ----------------------------------------------------------------------------
@@ -235,7 +240,7 @@ namespace Maui.ComboBox
             selectedItemLabel.SetBinding(Label.TextProperty, new Binding(nameof(SelectedItem), BindingMode.OneWay, source: this));
             selectedItemLabel.BindingContext = this;
 
-            // The up/down image. Use properties to change what .png is used.
+            // The up/down image. Use properties to change what .svg is used.
             // ----------------------------------------------------------------------------
             _arrowImage = new Image
             {
@@ -243,7 +248,6 @@ namespace Maui.ComboBox
                 HorizontalOptions = LayoutOptions.End,
                 VerticalOptions = LayoutOptions.Center,
                 Margin = new Thickness(0),
-                HeightRequest = 24,
             };
 
             // Main container for the label and icon
@@ -323,7 +327,7 @@ namespace Maui.ComboBox
             {
                 if (e?.CurrentSelection is { } item && e?.CurrentSelection.Count > 0)
                 {
-                    SelectedItem = item.First();
+                    SelectedItem = item[0];
                     itemCollectionView.SelectedItem = null;
                     TogglePopup();
                 }
@@ -342,6 +346,34 @@ namespace Maui.ComboBox
 
             _popupContainer.Unfocused += (_, _) => _popupContainer.IsVisible = false;
 
+            // Create the popup with the dedicated values
+            // ----------------------------------------------------------------------------
+            var bounds = GetControlBounds();
+            var popupWidth = DropDownWidth > 0 ? DropDownWidth : bounds.Width;
+            var popupHeight = DropDownHeight;
+            var scrollOffset = CheckAndGetScrollOffset();
+            _popupContainer.WidthRequest = popupWidth;
+            
+            _popup = new Popup
+            {
+                Content = _popupContainer,
+                WidthRequest = popupWidth,
+                HeightRequest = popupHeight,
+                CanBeDismissedByTappingOutsideOfPopup = true,
+                // The 0.5 numbers are used to add an offset, of half the size the control, to the popup is not placed over the header button
+                Margin = new Thickness(bounds.X * 0.5, bounds.Y * 0.5 + bounds.Height - scrollOffset, 0, 0),
+                Padding = 0,
+                VerticalOptions = LayoutOptions.Start,
+                HorizontalOptions = LayoutOptions.Start,
+                BackgroundColor = Colors.Transparent
+            };
+
+            _popup.Closed += (sender, args) =>
+            {
+                _popupContainer.IsVisible = false;
+                SetDropDownImage(_popupContainer.IsVisible);
+            };
+
             // Add main button to content view
             // ----------------------------------------------------------------------------
             Content = mainButtonLayout;
@@ -350,7 +382,10 @@ namespace Maui.ComboBox
             // Declare and add gesture recognition to toggle the popup
             // ----------------------------------------------------------------------------
             var togglePopupGesture = new TapGestureRecognizer();
-            togglePopupGesture.Tapped += (_, _) => TogglePopup();
+            togglePopupGesture.Tapped += (_, _) =>
+            {
+                TogglePopup();
+            };
             GestureRecognizers.Add(togglePopupGesture);
 
             // Placeholder management
@@ -387,27 +422,9 @@ namespace Maui.ComboBox
             };
         }
 
-        /// <summary>
-        /// Retrieves the value of a specified property from the given object based on
-        /// the provided property path. If the value is null or the property path is invalid,
-        /// a default value is returned.
-        /// </summary>
-        /// <param name="source">The object from which the property value should be retrieved.</param>
-        /// <param name="propertyPath">The path or name of the property to retrieve the value from.</param>
-        /// <param name="defaultValue">The value to return if the property path is null, invalid, or the resulting value is null.</param>
-        /// <returns>The value of the specified property, or the default value if the property is null or not found.</returns>
-        public static object? GetPropertyValue(object? source, string? propertyPath, string? defaultValue = null)
-        {
-            if (source == null) return defaultValue;
-            if (string.IsNullOrEmpty(propertyPath)) return source;
-            var property = source.GetType().GetProperty(propertyPath);
-            var value = property?.GetValue(source);
-            return string.IsNullOrEmpty(value?.ToString()) ? defaultValue : property?.GetValue(source);
-        }
-
         private static void CornerRadiusChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            if (bindable is ComboBox container) container.UpdateCornerRadius();
+            if (bindable is PopupComboBox container) container.UpdateCornerRadius();
         }
 
         /// <summary>
@@ -449,54 +466,47 @@ namespace Maui.ComboBox
         /// </summary>
         private void TogglePopup()
         {
-            if (_popup?.Parent != null)
-            {
-                if (_popup is not null)
-                {
-                    _popup.CloseAsync();
-                    _popup = null;
-                }
-                _popupContainer.IsVisible = false;
-            }
-            else
-            {
-                var bounds = GetControlBounds();
-                var popupWidth = DropDownWidth > 0 ? DropDownWidth : bounds.Width;
-                var popupHeight = DropDownHeight;
-                var scrollOffset = CheckAndGetScrollOffset();
-                _popupContainer.WidthRequest = popupWidth;
-                _popup = new Popup
-                {
-                    Content = _popupContainer,
-                    WidthRequest = popupWidth,
-                    HeightRequest = popupHeight,
-                    CanBeDismissedByTappingOutsideOfPopup = true,
-                    // The 0.5 numbers are used to add an offset, of half the size the control, to the popup is not placed over the header button
-                    Margin = new Thickness(bounds.X * 0.5, bounds.Y * 0.5 + bounds.Height - scrollOffset, 0, 0),
-                    Padding = 0,
-                    VerticalOptions = LayoutOptions.Start,
-                    HorizontalOptions = LayoutOptions.Start,
-                    BackgroundColor = Colors.Transparent
-                };
+            if (_isToggling)
+                return;
 
-                _popup.Closed += (sender, args) =>
+            _isToggling = true;
+
+            if (_popup?.Parent != null && _popupContainer.IsVisible)
+            {
+                _popup.CloseAsync();
+            }
+            else if (_popup != null)
+            {
+                // Recalculate the bounds of the control to position the popup correctly.
+                var bounds = GetControlBounds();
+                var scrollOffset = CheckAndGetScrollOffset();
+                var popupWidth = DropDownWidth > 0 ? DropDownWidth : bounds.Width;
+
+                // Setup new margin for the popup offset on screen.
+                // The 0.5 numbers are used to add an offset, of half the size the control, to the popup is not placed over the header button
+                _popupContainer.WidthRequest = popupWidth;
+                _popup.WidthRequest = popupWidth;
+                _popup.Margin = new Thickness(bounds.X * 0.5, bounds.Y * 0.5 + bounds.Height - scrollOffset, 0, 0);
+
+                if (Application.Current?.Windows[0].Page is Page currentPage)
                 {
-                    _popupContainer.IsVisible = false;
-                    SetDropDownImage(_popupContainer.IsVisible);
-                    _popup = null;
-                };
-                Application.Current?.Windows[0].Page?.ShowPopup(_popup, new PopupOptions
-                {
-                    PageOverlayColor = Colors.Transparent,
-                    Shape = new Rectangle
+                    currentPage.ShowPopup(_popup, new PopupOptions
                     {
-                        StrokeThickness = 0,
-                        Stroke = Colors.Transparent
-                    }
-                });
+                        PageOverlayColor = Colors.Transparent,
+                        Shape = new Rectangle
+                        {
+                            StrokeThickness = 0,
+                            Stroke = Colors.Transparent
+                        }
+                    });
+                }
+                
                 _popupContainer.IsVisible = true;
             }
+            
             SetDropDownImage(_popupContainer.IsVisible);
+            
+            _isToggling = false;
         }
 
         private Rect GetControlBounds()
@@ -543,8 +553,7 @@ namespace Maui.ComboBox
             {
                 if (disposing && _popup is not null)
                 {
-                    _popup?.CloseAsync();
-                    _popup = null;
+                    _popup.CloseAsync();
                 }
                 _disposed = true;
             }

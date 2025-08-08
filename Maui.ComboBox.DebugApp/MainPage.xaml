@@ -11,103 +11,34 @@
         <VerticalStackLayout
             Padding="50,0"
             Spacing="25">
+
+            <Label
+                Text="ComboBox Controls Test!"
+                Style="{StaticResource SubHeadline}"/>
+
+            <Label Text="PopupComboBox"/>
+                <controls:PopupComboBox
+                        DropdownCornerRadius="5"
+                        TextSize="15"
+                        DropdownBackgroundColor="LightGray"
+                        BackgroundColor="LightGray"
+                        DropdownShadow="False"
+                        Placeholder="Select item"
+                        DropdownImageTint="Gray"
+                        ItemsSource="{Binding ObjectItems}" 
+                        SelectedItem="{Binding SelectedObjectItem}"/>
+
+            <Label Text="CanvaComboBox"/>
+            <controls:CanvaComboBox
+                ItemsSource="{Binding ObjectItems}" 
+                SelectedItem="{Binding SelectedObjectItem}"
+                DropDownBackgroundColor="White"/>
+
+            <Label Text="GridComboBox"/>
+            <controls:GridComboBox
+                ItemsSource="{Binding StringItems}"
+                SelectedItem="{Binding SelectedStringItem}"/>
             
-            <Label
-                Text="ComboBox Control Test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-
-            <Border
-                    Padding="0"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 3,3,3,3">
-                <controls:ComboBox
-                        BackgroundColor="White"
-                        DropdownCornerRadius="5"
-                        TextSize="15"
-                        DropdownClosedImageSource="gear.svg"
-                        DropdownBackgroundColor="White"
-                        DropdownShadow="False"
-                        Placeholder="Select item"
-                        DropdownImageTint="Red"
-                        ItemsSource="{Binding ObjectItems}" 
-                        SelectedItem="{Binding SelectedObjectItem}"/>
-            </Border>
-
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-
-            <Button
-                Text="Go to new sub page"
-                Clicked="Button_Clicked"
-                ></Button>
-            <Border
-                    Padding="0"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 3,3,3,3">
-                <controls:ComboBox
-                        BackgroundColor="Green"
-                        DropdownBackgroundColor="Green"
-                        DropdownCornerRadius="5"
-                        TextSize="15"
-                        TextColor="White"
-                        DropdownTextColor="White"
-                        DropdownBorderWidth="0"
-                        DropdownShadow="False"
-                        Placeholder="Select item"
-                        ItemsSource="{Binding ObjectItems}" 
-                        SelectedItem="{Binding SelectedObjectItem}"/>
-            </Border>
-
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-
-            <Border
-                    Padding="0"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 3,3,3,3">
-                <controls:ComboBox
-                        BackgroundColor="White"
-                        DropdownCornerRadius="5"
-                        TextSize="25"
-                        TextColor="Blue"
-                        DropdownTextColor="Blue"
-                        DropdownBorderWidth="0"
-                        DropdownBackgroundColor="White"
-                        DropdownShadow="False"
-                        DropDownWidth="200"
-                        DropDownHeight="100"
-                        Placeholder="Select item"
-                        ItemsSource="{Binding ObjectItems}" 
-                        SelectedItem="{Binding SelectedObjectItem}"/>
-            </Border>
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
-            <Label
-                Text="Fill some space for scroll placement test!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

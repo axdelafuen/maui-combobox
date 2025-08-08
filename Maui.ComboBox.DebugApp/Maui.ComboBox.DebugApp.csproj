@@ -24,7 +24,7 @@
         <ApplicationTitle>ComboBox Debug</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.axdelafuen.maui.combobox.debug</ApplicationId>
+        <ApplicationId>com.axdelafuen.maui.ComboBox.debug</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -49,7 +49,7 @@
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
         <!-- Images -->
-		<MauiImage Include="Resources\Images\gear.svg"/>
+		<MauiImage Include="Resources\Images\gear.svg" />
 
 		<!-- Custom Fonts -->
         <MauiFont Include="Resources\Fonts\*" />
@@ -69,13 +69,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="SubPage.xaml.cs">
-        <DependentUpon>SubPage.xaml</DependentUpon>
-      </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <MauiXaml Update="SubPage.xaml">
+      <MauiXaml Update="SamplePages\CanvaComboBoxSamplePage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+      <MauiXaml Update="SamplePages\PopupComboBoxSamplePage.xaml">
         <Generator>MSBuild:Compile</Generator>
       </MauiXaml>
     </ItemGroup>

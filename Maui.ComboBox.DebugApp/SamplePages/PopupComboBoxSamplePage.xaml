@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Maui.ComboBox;assembly=Maui.ComboBox.Lib"
+             xmlns:local="clr-namespace:Maui.ComboBox.DebugApp.SamplePages"
+             x:Class="Maui.ComboBox.DebugApp.SamplePages.PopupComboBoxSamplePage"
+             x:DataType="local:PopupComboBoxSamplePage"
+             Title="PopupComboBox">
+    <VerticalStackLayout>
+        <Label
+            Text="PopupComboBox Control Test!"
+            Style="{StaticResource SubHeadline}"/>
+
+        <Label Text="ComboBox using object"/>
+        <Border
+            Padding="0"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 3,3,3,3">
+            <controls:PopupComboBox
+                BackgroundColor="White"
+                DropdownCornerRadius="5"
+                TextSize="15"
+                DropdownBackgroundColor="White"
+                DropdownShadow="False"
+                Placeholder="Select object"
+                DropdownImageTint="Gray"
+                ItemsSource="{Binding ObjectItems}" 
+                SelectedItem="{Binding SelectedObjectItem}"/>
+        </Border>
+        
+        <Label Text="ComboBox using string"/>
+        <Border
+            Padding="0"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 3,3,3,3">
+            <controls:PopupComboBox
+                BackgroundColor="White"
+                DropdownCornerRadius="5"
+                TextSize="15"
+                DropdownBackgroundColor="White"
+                DropdownShadow="False"
+                Placeholder="Select string"
+                DropdownImageTint="Gray"
+                ItemsSource="{Binding StringItems}" 
+                SelectedItem="{Binding SelectedStringItem}"/>
+        </Border>
+    </VerticalStackLayout>
+</ContentPage>
