@@ -1,12 +1,26 @@
 # Maui.ComboBox
 
-There is no * FREE * ComboBox available in .NET MAUI. 
+There is no * FREE * ComboBox available in .NET MAUI. (_fuck syncfusion, devexpress or telerik_).
 
-Here is a simple, responsive and customizable ComboBox. This project is mostly inspired by the project : [Maui.DropDown](https://github.com/trevleyb/Maui.DropDown). (I felt that the inital project is most like a 'Picker' for the ComboBox and an 'Expander' for the 'DropDown', this is why I developped my own ComboBox).
+Here is a simple, project for ComboBox implementation. Part of this project is inspired by: [Maui.DropDown by trevleyb](https://github.com/trevleyb/Maui.DropDown). It was initially a fork, but today it has nothing to do with the original project, which is why the repo has become standalone. 
+
+There are currently 3 different ComboBox implementations. Each has its own pros and cons, here's a quick recap of what I've been working on:
+
+| Implementation | Short description | Pros | Cons |
+| - | - | - | - |
+| Popup | With MAUI.Toolkit open a popup with CollectionView of the ItemsSource  | Works :), customizable, reponsive | Bad performances |
+| Canva | Draw a canva with every item from ItemsSource | Lightweight, cutomizable | Bad responsivness (can move UI on open) |
+| Grid | Use Grid and visibility behavior to show/hide the CollectionView of ItemsSource | _working on it_ | _working on it_ |
+
+For now, it is recommended to use the `PopupComboBox`. Details on the use of other controls will be written once development are finalized.
+
+## Samples
+
+A very bad name was chosen by myself for the application allowing to make examples of use. However you can find examples of uses of ComboBoxes in: `./Maui.ComboBox.DebugApp/`.
 
 ## Getting started
 
-Key points:
+Key points for `PopupComboBox`:
 
 If you ar using an Object as the ItemsSource collection then it should implement ToString() to display the correct item.  
 
@@ -19,7 +33,7 @@ xmlns:controls="clr-namespace:Namespace.Of.The.Control"
 ```
 
 ```xaml
-<controls:ComboBox   
+<controls:PopupComboBox   
     ItemsSource="{Binding ItemsSource}"
     SelectedItem="{Binding SelectedItem}"
     Placeholder="Click for item"
