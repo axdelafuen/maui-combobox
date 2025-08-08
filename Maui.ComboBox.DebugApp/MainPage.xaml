@@ -35,6 +35,11 @@
                         SelectedItem="{Binding SelectedObjectItem}"/>
             </Border>
 
+            <controls:NewComboBox
+                ItemsSource="{Binding ObjectItems}" 
+                SelectedItem="{Binding SelectedObjectItem}"
+                DropDownBackgroundColor="White"/>
+
             <Label
                 Text="Fill some space for scroll placement test!"
                 Style="{StaticResource Headline}"

@@ -48,6 +48,9 @@ namespace Maui.ComboBox
         public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(ComboBox), "chevron_down.svg");
         public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(ComboBox));
         public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(ComboBox), true);
+        #endregion
+
+        #region Attributes
 
         /// <summary>
         /// The source of the dropdown list. This is either a collection of strings
