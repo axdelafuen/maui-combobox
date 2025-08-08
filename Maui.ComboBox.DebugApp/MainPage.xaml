@@ -21,7 +21,7 @@
                     Padding="0"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 3,3,3,3">
-                <controls:ComboBox
+                <controls:PopupComboBox
                         BackgroundColor="White"
                         DropdownCornerRadius="5"
                         TextSize="15"
@@ -35,10 +35,13 @@
                         SelectedItem="{Binding SelectedObjectItem}"/>
             </Border>
 
-            <controls:NewComboBox
+            <controls:CanvaComboBox
                 ItemsSource="{Binding ObjectItems}" 
                 SelectedItem="{Binding SelectedObjectItem}"
                 DropDownBackgroundColor="White"/>
+
+            <controls:Dropdown
+                Items="{Binding ObjectItems}"/>
 
             <Label
                 Text="Fill some space for scroll placement test!"
@@ -53,7 +56,7 @@
                     Padding="0"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 3,3,3,3">
-                <controls:ComboBox
+                <controls:PopupComboBox
                         BackgroundColor="Green"
                         DropdownBackgroundColor="Green"
                         DropdownCornerRadius="5"
@@ -91,7 +94,7 @@
                     Padding="0"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 3,3,3,3">
-                <controls:ComboBox
+                <controls:PopupComboBox
                         BackgroundColor="White"
                         DropdownCornerRadius="5"
                         TextSize="25"

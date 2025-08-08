@@ -1,25 +1,24 @@
 ﻿using Maui.ComboBox.Lib.Helpers;
 using System.Collections;
-using Microsoft.Maui.Controls;
 
 namespace Maui.ComboBox
 {
-    public partial class NewComboBox : GraphicsView
+    public partial class CanvaComboBox : GraphicsView
     {
         #region Bindable properties
 
-        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(ICollection), typeof(NewComboBox), propertyChanged: OnItemsSourceChanged);
-        public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(NewComboBox), -1, propertyChanged: OnSelectedIndexChanged);
-        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(NewComboBox), null, propertyChanged: OnSelectedItemChanged);
-        public static readonly BindableProperty LabelProperty = BindableProperty.Create(nameof(Label), typeof(string), typeof(NewComboBox), "Select item...");
-        public static readonly BindableProperty FontColorProperty = BindableProperty.Create(nameof(FontColor), typeof(Color), typeof(NewComboBox), Colors.Black);
-        public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(nameof(FontSize), typeof(float), typeof(NewComboBox), 16f);
-        public static readonly BindableProperty OutlineColorProperty = BindableProperty.Create(nameof(OutlineColor), typeof(Color), typeof(NewComboBox), Colors.Gray);
-        public static readonly BindableProperty OutlineWidthProperty = BindableProperty.Create(nameof(OutlineWidth), typeof(float), typeof(NewComboBox), 1f);
-        public static readonly BindableProperty DropDownBackgroundColorProperty = BindableProperty.Create(nameof(DropDownBackgroundColor), typeof(Color), typeof(NewComboBox), Colors.White);
-        public static readonly BindableProperty DropDownTextColorProperty = BindableProperty.Create(nameof(DropDownTextColor), typeof(Color), typeof(NewComboBox), Colors.Black);
-        public static readonly BindableProperty HeaderBackgroundColorProperty = BindableProperty.Create(nameof(HeaderBackgroundColor), typeof(Color), typeof(NewComboBox), Colors.White);
-        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(NewComboBox), string.Empty);
+        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(ICollection), typeof(CanvaComboBox), propertyChanged: OnItemsSourceChanged);
+        public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(CanvaComboBox), -1, propertyChanged: OnSelectedIndexChanged);
+        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(CanvaComboBox), null, propertyChanged: OnSelectedItemChanged);
+        public static readonly BindableProperty LabelProperty = BindableProperty.Create(nameof(Label), typeof(string), typeof(CanvaComboBox), "Select item...");
+        public static readonly BindableProperty FontColorProperty = BindableProperty.Create(nameof(FontColor), typeof(Color), typeof(CanvaComboBox), Colors.Black);
+        public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(nameof(FontSize), typeof(float), typeof(CanvaComboBox), 16f);
+        public static readonly BindableProperty OutlineColorProperty = BindableProperty.Create(nameof(OutlineColor), typeof(Color), typeof(CanvaComboBox), Colors.Gray);
+        public static readonly BindableProperty OutlineWidthProperty = BindableProperty.Create(nameof(OutlineWidth), typeof(float), typeof(CanvaComboBox), 1f);
+        public static readonly BindableProperty DropDownBackgroundColorProperty = BindableProperty.Create(nameof(DropDownBackgroundColor), typeof(Color), typeof(CanvaComboBox), Colors.White);
+        public static readonly BindableProperty DropDownTextColorProperty = BindableProperty.Create(nameof(DropDownTextColor), typeof(Color), typeof(CanvaComboBox), Colors.Black);
+        public static readonly BindableProperty HeaderBackgroundColorProperty = BindableProperty.Create(nameof(HeaderBackgroundColor), typeof(Color), typeof(CanvaComboBox), Colors.White);
+        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(CanvaComboBox), string.Empty);
 
         #endregion
 
@@ -105,135 +104,139 @@ namespace Maui.ComboBox
         private int _hoveredIndex = -1;
         private float _scrollOffset = 0f;
         private bool _isDragging = false;
-        private PointF _startDragPoint;
-        private float _totalDragDistance = 0f;
+        private PointF _lastDragPoint;
 
         private const int MaxVisibleItems = 6;
         private const float ItemHeight = 36f;
         private const float HeaderHeight = 48f;
-        private const float DragThreshold = 15f; // Minimum distance to start scrolling
 
-        public NewComboBox()
+        public CanvaComboBox()
         {
             Drawable = new ComboBoxDrawable(this);
-            HeightRequest = HeaderHeight; // FIXED: Keep constant height for overlay
+            HeightRequest = HeaderHeight;
             WidthRequest = 200;
             BackgroundColor = Colors.Transparent;
 
+            // Use a single tap gesture recognizer
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += OnTapped;
+            GestureRecognizers.Add(tapGesture);
+
+            // Handle pointer events for better control
             StartInteraction += OnStartInteraction;
             DragInteraction += OnDragInteraction;
             EndInteraction += OnEndInteraction;
         }
 
-        private void OnGlobalTapped(object? sender, TappedEventArgs e)
+        private void OnTapped(object sender, TappedEventArgs e)
         {
-            if (!_isDropDownOpen) return;
-
-            // Check if the tap was on this control
-            var position = e.GetPosition((View?)sender);
+            var position = e.GetPosition(this);
             if (position == null) return;
 
-            // Get this control's bounds relative to the main page
-            var thisPosition = this.GetAbsolutePosition();
-            var thisBounds = new RectF(
-                (float)thisPosition.X,
-                (float)thisPosition.Y,
-                (float)Width,
-                (float)(HeaderHeight + (_isDropDownOpen ? GetDropDownHeight() : 0))
-            );
+            var point = position.Value;
 
-            // If tap is outside this control, close dropdown
-            if (!thisBounds.Contains((float)position.Value.X, (float)position.Value.Y))
-            {
-                CloseDropDown();
-            }
-        }
-
-        private void OnStartInteraction(object? sender, TouchEventArgs e)
-        {
-            if (e.Touches.Length == 0) return;
-
-            var point = new PointF(e.Touches[0].X, e.Touches[0].Y);
-            _startDragPoint = point;
-            _isDragging = false;
-            _totalDragDistance = 0f;
-
-            // Handle header click to toggle dropdown
+            // If clicking on header, toggle dropdown
             if (IsHeaderClick(point))
             {
                 ToggleDropDown();
                 return;
             }
 
-            // Update hover state for dropdown items
+            // If dropdown is open and clicking on an item
+            if (_isDropDownOpen && IsDropDownClick(point))
+            {
+                SelectItemAtPoint(point);
+                return;
+            }
+
+            // If clicking outside, close dropdown
+            if (_isDropDownOpen)
+            {
+                CloseDropDown();
+            }
+        }
+
+        private void OnStartInteraction(object sender, TouchEventArgs e)
+        {
+            if (e.Touches.Length == 0) return;
+
+            var point = new PointF(e.Touches[0].X, e.Touches[0].Y);
+            _lastDragPoint = point;
+            _isDragging = false;
+
+            // Check if starting drag in dropdown area
             if (_isDropDownOpen && IsDropDownClick(point))
             {
                 UpdateHoveredIndex(point);
             }
         }
 
-        private void OnDragInteraction(object? sender, TouchEventArgs e)
+        private void OnDragInteraction(object sender, TouchEventArgs e)
         {
             if (e.Touches.Length == 0 || !_isDropDownOpen) return;
 
-            var currentPoint = new PointF(e.Touches[0].X, e.Touches[0].Y);
+            var point = new PointF(e.Touches[0].X, e.Touches[0].Y);
 
-            // Calculate total drag distance from start point
-            var dragDeltaFromStart = Math.Abs(currentPoint.Y - _startDragPoint.Y);
-            _totalDragDistance = Math.Max(_totalDragDistance, dragDeltaFromStart);
+            // Calculate drag distance to determine if this is a scroll or selection
+            var dragDistance = Math.Sqrt(Math.Pow(point.X - _lastDragPoint.X, 2) + Math.Pow(point.Y - _lastDragPoint.Y, 2));
 
-            // Only start dragging if we've moved enough
-            if (_totalDragDistance > DragThreshold)
+            if (dragDistance > 10) // Threshold for scroll vs tap
             {
                 _isDragging = true;
             }
 
-            // Handle scrolling if we're dragging and in dropdown area
-            if (_isDragging && IsDropDownClick(currentPoint) && ItemsSource != null && ItemsSource.Count > MaxVisibleItems)
+            if (_isDragging && IsDropDownClick(point))
             {
-                var deltaY = _startDragPoint.Y - currentPoint.Y;
-                var maxScroll = Math.Max(0, (ItemsSource.Count * ItemHeight) - (MaxVisibleItems * ItemHeight));
-
-                _scrollOffset = Math.Clamp(_scrollOffset + deltaY * 2f, 0, maxScroll); // Multiply by 2 for faster scrolling
-                _startDragPoint = currentPoint; // Update reference point for continuous scrolling
-
-                Invalidate();
+                // Handle scrolling
+                if (ItemsSource != null && ItemsSource.Count > MaxVisibleItems)
+                {
+                    var deltaY = _lastDragPoint.Y - point.Y;
+                    var maxScroll = Math.Max(0, (ItemsSource.Count * ItemHeight) - (MaxVisibleItems * ItemHeight));
+                    _scrollOffset = Math.Clamp(_scrollOffset + deltaY, 0, maxScroll);
+                    Invalidate();
+                }
             }
-            else if (!_isDragging && IsDropDownClick(currentPoint))
+            else if (!_isDragging && IsDropDownClick(point))
             {
-                // Update hover state for potential selection
-                UpdateHoveredIndex(currentPoint);
+                // Update hover for selection
+                UpdateHoveredIndex(point);
             }
+
+            _lastDragPoint = point;
         }
 
-        private void OnEndInteraction(object? sender, TouchEventArgs e)
+        private void OnEndInteraction(object sender, TouchEventArgs e)
         {
             if (e.Touches.Length == 0) return;
 
             var point = new PointF(e.Touches[0].X, e.Touches[0].Y);
 
-            // If we were dragging, don't select an item
-            if (_isDragging)
+            if (_isDropDownOpen)
             {
-                _isDragging = false;
-                _hoveredIndex = -1;
-                Invalidate();
-                return;
-            }
+                // If we were dragging, don't select an item
+                if (_isDragging)
+                {
+                    _isDragging = false;
+                    _hoveredIndex = -1;
+                    Invalidate();
+                    return;
+                }
 
-            // Handle item selection on tap (not drag)
-            if (_isDropDownOpen && IsDropDownClick(point))
-            {
-                SelectItemAtPoint(point);
-            }
-            // Handle clicking outside dropdown
-            else if (_isDropDownOpen && !IsHeaderClick(point))
-            {
-                CloseDropDown();
+                // If clicking on dropdown item, select it
+                if (IsDropDownClick(point))
+                {
+                    SelectItemAtPoint(point);
+                    return;
+                }
+
+                // If clicking outside dropdown (but not on header), close it
+                if (!IsHeaderClick(point))
+                {
+                    CloseDropDown();
+                }
             }
 
             _isDragging = false;
-            _totalDragDistance = 0f;
         }
 
         private bool IsHeaderClick(PointF point)
@@ -245,29 +248,33 @@ namespace Maui.ComboBox
         {
             if (!_isDropDownOpen || ItemsSource == null) return false;
 
-            var dropDownHeight = GetDropDownHeight();
-            return point.Y >= HeaderHeight && point.Y <= HeaderHeight + dropDownHeight &&
-                   point.X >= 0 && point.X <= Width;
-        }
-
-        private float GetDropDownHeight()
-        {
-            if (ItemsSource == null) return 0;
-            int visibleCount = Math.Min(ItemsSource.Count, MaxVisibleItems);
-            return visibleCount * ItemHeight;
+            var dropDownRect = GetDropDownRect();
+            return dropDownRect.Contains(point);
         }
 
         private void UpdateHoveredIndex(PointF point)
         {
-            if (!_isDropDownOpen || ItemsSource == null) return;
+            if (!_isDropDownOpen) return;
 
-            var relativeY = point.Y - HeaderHeight;
-            var index = GetItemIndexAt(relativeY + _scrollOffset);
-
-            if (index != _hoveredIndex && index >= 0 && index < ItemsSource.Count)
+            var dropDownRect = GetDropDownRect();
+            if (dropDownRect.Contains(point))
             {
-                _hoveredIndex = index;
-                Invalidate();
+                var relativeY = point.Y - dropDownRect.Top;
+                var index = GetItemIndexAt(relativeY + _scrollOffset);
+
+                if (index != _hoveredIndex)
+                {
+                    _hoveredIndex = index;
+                    Invalidate();
+                }
+            }
+            else
+            {
+                if (_hoveredIndex != -1)
+                {
+                    _hoveredIndex = -1;
+                    Invalidate();
+                }
             }
         }
 
@@ -275,16 +282,20 @@ namespace Maui.ComboBox
         {
             if (!_isDropDownOpen || ItemsSource == null) return;
 
-            var relativeY = point.Y - HeaderHeight;
-            var index = GetItemIndexAt(relativeY + _scrollOffset);
-
-            if (index >= 0 && index < ItemsSource.Count)
+            var dropDownRect = GetDropDownRect();
+            if (dropDownRect.Contains(point))
             {
-                SelectedIndex = index;
-                var selectedItem = CollectionHelper.GetItemAt(ItemsSource, index);
-                SelectedItem = selectedItem;
-                SelectedIndexChanged?.Invoke(this, index);
-                CloseDropDown();
+                var relativeY = point.Y - dropDownRect.Top;
+                var index = GetItemIndexAt(relativeY + _scrollOffset);
+
+                if (index >= 0 && index < ItemsSource.Count)
+                {
+                    SelectedIndex = index;
+                    var selectedItem = CollectionHelper.GetItemAt(ItemsSource, index);
+                    SelectedItem = selectedItem;
+                    SelectedIndexChanged?.Invoke(this, index);
+                    CloseDropDown();
+                }
             }
         }
 
@@ -294,8 +305,7 @@ namespace Maui.ComboBox
             _hoveredIndex = -1;
             _scrollOffset = 0f;
             _isDragging = false;
-            _totalDragDistance = 0f;
-            // DON'T change HeightRequest - keep overlay behavior
+            UpdateHeightRequest();
             Invalidate();
         }
 
@@ -304,13 +314,27 @@ namespace Maui.ComboBox
             _isDropDownOpen = false;
             _hoveredIndex = -1;
             _isDragging = false;
-            _totalDragDistance = 0f;
+            UpdateHeightRequest();
             Invalidate();
+        }
+
+        private void UpdateHeightRequest()
+        {
+            if (_isDropDownOpen && ItemsSource != null && ItemsSource.Count > 0)
+            {
+                int visibleCount = Math.Min(ItemsSource.Count, MaxVisibleItems);
+                float dropDownHeight = visibleCount * ItemHeight;
+                HeightRequest = HeaderHeight + dropDownHeight;
+            }
+            else
+            {
+                HeightRequest = HeaderHeight;
+            }
         }
 
         private static void OnItemsSourceChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var combo = (NewComboBox)bindable;
+            var combo = (CanvaComboBox)bindable;
             combo.SelectedIndex = -1;
             combo.SelectedItem = null;
             combo._scrollOffset = 0f;
@@ -319,7 +343,7 @@ namespace Maui.ComboBox
 
         private static void OnSelectedIndexChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var combo = (NewComboBox)bindable;
+            var combo = (CanvaComboBox)bindable;
             int idx = (int)newValue;
             if (combo.ItemsSource != null && idx >= 0 && idx < combo.ItemsSource.Count)
             {
@@ -338,7 +362,7 @@ namespace Maui.ComboBox
 
         private static void OnSelectedItemChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var combo = (NewComboBox)bindable;
+            var combo = (CanvaComboBox)bindable;
             int idx = -1;
 
             if (combo.ItemsSource != null && newValue != null)
@@ -362,6 +386,16 @@ namespace Maui.ComboBox
             combo.Invalidate();
         }
 
+        private RectF GetDropDownRect()
+        {
+            if (!_isDropDownOpen || ItemsSource == null)
+                return new RectF(0, 0, 0, 0);
+
+            int visibleCount = Math.Min(ItemsSource.Count, MaxVisibleItems);
+            float menuHeight = visibleCount * ItemHeight;
+            return new RectF(0, HeaderHeight, (float)Width, menuHeight);
+        }
+
         private int GetItemIndexAt(float y)
         {
             if (ItemsSource == null) return -1;
@@ -372,9 +406,9 @@ namespace Maui.ComboBox
 
         class ComboBoxDrawable : IDrawable
         {
-            private readonly NewComboBox _combo;
+            private readonly CanvaComboBox _combo;
 
-            public ComboBoxDrawable(NewComboBox combo)
+            public ComboBoxDrawable(CanvaComboBox combo)
             {
                 _combo = combo;
             }
@@ -471,25 +505,20 @@ namespace Maui.ComboBox
 
                 canvas.SaveState();
 
-                // Draw shadow for overlay effect
-                var shadowRect = new RectF(dropDownRect.X + 2, dropDownRect.Y + 2, dropDownRect.Width, dropDownRect.Height);
-                canvas.FillColor = Colors.Black.WithAlpha(0.1f);
-                canvas.FillRoundedRectangle(shadowRect, 4f);
-
                 // Draw dropdown background
                 canvas.FillColor = _combo.DropDownBackgroundColor;
-                canvas.FillRoundedRectangle(dropDownRect, 4f);
+                canvas.FillRectangle(dropDownRect);
 
                 // Draw dropdown border
                 canvas.StrokeColor = Colors.Gray;
                 canvas.StrokeSize = 1;
-                canvas.DrawRoundedRectangle(dropDownRect, 4f);
+                canvas.DrawRectangle(dropDownRect);
 
                 // Clip content to dropdown area
                 canvas.ClipRectangle(dropDownRect);
 
-                // Calculate which items to draw based on scroll
-                int startIndex = Math.Max(0, (int)(_combo._scrollOffset / ItemHeight));
+                // Calculate which items to draw
+                int startIndex = (int)(_combo._scrollOffset / ItemHeight);
                 int endIndex = Math.Min(totalCount, startIndex + visibleCount + 2);
 
                 // Draw items
@@ -498,7 +527,7 @@ namespace Maui.ComboBox
                 {
                     var item = itemsList[i];
                     float itemY = HeaderHeight + (i * ItemHeight) - _combo._scrollOffset;
-                    var itemRect = new RectF(4, itemY, (float)_combo.Width - 8, ItemHeight);
+                    var itemRect = new RectF(0, itemY, (float)_combo.Width, ItemHeight);
 
                     // Skip items that are completely outside visible area
                     if (itemRect.Bottom < HeaderHeight || itemRect.Top > HeaderHeight + menuHeight)
@@ -508,20 +537,20 @@ namespace Maui.ComboBox
                     if (i == _combo._hoveredIndex)
                     {
                         canvas.FillColor = Colors.LightGray.WithAlpha(0.5f);
-                        canvas.FillRoundedRectangle(itemRect, 2f);
+                        canvas.FillRectangle(itemRect);
                     }
                     else if (i == _combo.SelectedIndex)
                     {
                         canvas.FillColor = Colors.LightBlue.WithAlpha(0.3f);
-                        canvas.FillRoundedRectangle(itemRect, 2f);
+                        canvas.FillRectangle(itemRect);
                     }
 
                     // Draw item text
                     string itemText = item?.ToString() ?? "null";
                     canvas.FontColor = _combo.DropDownTextColor;
                     canvas.FontSize = _combo.FontSize;
-                    canvas.DrawString(itemText, itemRect.X + 8, itemRect.Y + (ItemHeight - _combo.FontSize) / 2,
-                                    itemRect.Width - 16, ItemHeight,
+                    canvas.DrawString(itemText, 12, itemRect.Y + (ItemHeight - _combo.FontSize) / 2,
+                                    (float)_combo.Width - 24, ItemHeight,
                                     HorizontalAlignment.Left, VerticalAlignment.Center);
                 }
 
@@ -541,12 +570,12 @@ namespace Maui.ComboBox
 
                 // Calculate scrollbar dimensions
                 float scrollBarHeight = Math.Max(20f, visibleHeight * (visibleHeight / totalContentHeight));
-                float maxScrollOffset = Math.Max(0, totalContentHeight - visibleHeight);
-                float scrollRatio = maxScrollOffset > 0 ? _combo._scrollOffset / maxScrollOffset : 0;
-                float scrollBarY = dropDownRect.Top + 4 + (visibleHeight - scrollBarHeight - 8) * scrollRatio;
+                float scrollRange = visibleHeight - scrollBarHeight;
+                float scrollRatio = _combo._scrollOffset / (totalContentHeight - visibleHeight);
+                float scrollBarY = dropDownRect.Top + scrollRange * scrollRatio;
 
                 var scrollBarRect = new RectF(
-                    dropDownRect.Right - 12,
+                    dropDownRect.Right - 8,
                     scrollBarY,
                     6,
                     scrollBarHeight
@@ -556,24 +585,5 @@ namespace Maui.ComboBox
                 canvas.FillRoundedRectangle(scrollBarRect, 3);
             }
         }
-    }
-}
-
-// Extension method to get absolute position
-public static class ViewExtensions
-{
-    public static Point GetAbsolutePosition(this View view)
-    {
-        double x = 0, y = 0;
-        var current = view;
-
-        while (current != null)
-        {
-            x += current.X;
-            y += current.Y;
-            current = current.Parent as View;
-        }
-
-        return new Point(x, y);
     }
 }

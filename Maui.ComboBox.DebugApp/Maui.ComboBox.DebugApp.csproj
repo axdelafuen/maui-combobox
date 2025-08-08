@@ -24,7 +24,7 @@
         <ApplicationTitle>ComboBox Debug</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.axdelafuen.maui.combobox.debug</ApplicationId>
+        <ApplicationId>com.axdelafuen.maui.ComboBox.debug</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

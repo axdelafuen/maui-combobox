@@ -7,71 +7,40 @@
              x:Class="Maui.ComboBox.DebugApp.SubPage"
              Title="SubPage">
     <Grid RowDefinitions="*,Auto">
-        <ScrollView>
-            <VerticalStackLayout>
-                <Label
-                    Text="A sub page!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
+        <VerticalStackLayout>
+            <Label
+                Text="A sub page!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
 
-                <controls:ComboBox
-                    DropdownCornerRadius="5"
-                    TextSize="15"
-                    TextColor="Black"
-                    DropdownTextColor="Black"
-                    DropdownBorderWidth="0"
-                    DropdownShadow="False"
-                    Placeholder="Select item"
-                    ItemsSource="{Binding ObjectItems}" 
-                    SelectedItem="{Binding SelectedObjectItem}"/>
+            <controls:CanvaComboBox
+                ItemsSource="{Binding ObjectItems}" 
+                SelectedItem="{Binding SelectedObjectItem}"
+                DropDownBackgroundColor="White"/>
 
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
+                
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
 
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
+            <controls:PopupComboBox
+                DropdownCornerRadius="5"
+                TextSize="15"
+                TextColor="Black"
+                DropdownTextColor="Black"
+                DropdownBorderWidth="0"
+                DropdownShadow="False"
+                Placeholder="Select item"
+                ItemsSource="{Binding ObjectItems}" 
+                SelectedItem="{Binding SelectedObjectItem}"/>
 
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
+            <Label
+                Text="Fill some space for scroll placement test!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"/>
 
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
-
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
-
-                <controls:ComboBox
-                    DropdownCornerRadius="5"
-                    TextSize="15"
-                    TextColor="Black"
-                    DropdownTextColor="Black"
-                    DropdownBorderWidth="0"
-                    DropdownShadow="False"
-                    Placeholder="Select item"
-                    ItemsSource="{Binding ObjectItems}" 
-                    SelectedItem="{Binding SelectedObjectItem}"/>
-
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
-
-                <Label
-                    Text="Fill some space for scroll placement test!"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
-            </VerticalStackLayout>
-        </ScrollView>
+        </VerticalStackLayout>
         <VerticalStackLayout
             Grid.Row="1">
             <Button

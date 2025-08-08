@@ -10,13 +10,13 @@ using ScrollView = Microsoft.Maui.Controls.ScrollView;
 using VisualElement = Microsoft.Maui.Controls.VisualElement;
 
 /*
- * This DropDownBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
+ * This ComboBox is forked from an existing project. Refer to: https://github.com/trevleyb/Maui.DropDown
  * This project is under MIT License. Refer to: https://github.com/trevleyb/Maui.DropDown/blob/main/LICENSE
  */
 
 namespace Maui.ComboBox
 {
-    public partial class ComboBox : ContentView, IDisposable
+    public partial class PopupComboBox : ContentView, IDisposable
     {
         private Popup? _popup;
         private bool _disposed;
@@ -26,28 +26,28 @@ namespace Maui.ComboBox
 
         private bool _isToggling = false;
 
-        public ComboBox()
+        public PopupComboBox()
         {
-            HandleComboBox();
+            HandlePopupComboBox();
         }
 
         #region Bindable Properties
-        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(ComboBox));
-        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(ComboBox), null, BindingMode.TwoWay);
-        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(ComboBox), string.Empty);
-        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(ComboBox), Colors.Black);
-        public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(ComboBox), 12.0);
-        public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(ComboBox), -1.0);
-        public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(ComboBox), 200.0);
-        public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(ComboBox), new CornerRadius(0), propertyChanged: CornerRadiusChanged);
-        public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(ComboBox), Colors.Black);
-        public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(ComboBox), Colors.White);
-        public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(ComboBox), Colors.Transparent);
-        public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(ComboBox), 0.0);
-        public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(ComboBox), "chevron_right.svg");
-        public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(ComboBox), "chevron_down.svg");
-        public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(ComboBox));
-        public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(ComboBox), true);
+        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(PopupComboBox));
+        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(PopupComboBox), null, BindingMode.TwoWay);
+        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(PopupComboBox), string.Empty);
+        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(PopupComboBox), Colors.Black);
+        public static readonly BindableProperty TextSizeProperty = BindableProperty.Create(nameof(TextSize), typeof(double), typeof(PopupComboBox), 12.0);
+        public static readonly BindableProperty DropDownWidthProperty = BindableProperty.Create(nameof(DropDownWidth), typeof(double), typeof(PopupComboBox), -1.0);
+        public static readonly BindableProperty DropDownHeightProperty = BindableProperty.Create(nameof(DropDownHeight), typeof(double), typeof(PopupComboBox), 200.0);
+        public static readonly BindableProperty DropdownCornerRadiusProperty = BindableProperty.Create(nameof(DropdownCornerRadius), typeof(CornerRadius), typeof(PopupComboBox), new CornerRadius(0), propertyChanged: CornerRadiusChanged);
+        public static readonly BindableProperty DropdownTextColorProperty = BindableProperty.Create(nameof(DropdownTextColor), typeof(Color), typeof(PopupComboBox), Colors.Black);
+        public static readonly BindableProperty DropdownBackgroundColorProperty = BindableProperty.Create(nameof(DropdownBackgroundColor), typeof(Color), typeof(PopupComboBox), Colors.White);
+        public static readonly BindableProperty DropdownBorderColorProperty = BindableProperty.Create(nameof(DropdownBorderColor), typeof(Color), typeof(PopupComboBox), Colors.Transparent);
+        public static readonly BindableProperty DropdownBorderWidthProperty = BindableProperty.Create(nameof(DropdownBorderWidth), typeof(double), typeof(PopupComboBox), 0.0);
+        public static readonly BindableProperty DropdownClosedImageSourceProperty = BindableProperty.Create(nameof(DropdownClosedImageSource), typeof(string), typeof(PopupComboBox), "chevron_right.svg");
+        public static readonly BindableProperty DropdownOpenImageSourceProperty = BindableProperty.Create(nameof(DropdownOpenImageSource), typeof(string), typeof(PopupComboBox), "chevron_down.svg");
+        public static readonly BindableProperty DropdownImageTintProperty = BindableProperty.Create(nameof(DropdownImageTint), typeof(Color), typeof(PopupComboBox));
+        public static readonly BindableProperty DropdownShadowProperty = BindableProperty.Create(nameof(DropdownShadow), typeof(bool), typeof(PopupComboBox), true);
         #endregion
 
         #region Attributes
@@ -221,10 +221,10 @@ namespace Maui.ComboBox
         #endregion
 
         /// <summary>
-        /// Renders the combobox menu, handling its visual update and ensuring
+        /// Renders the PopupComboBox menu, handling its visual update and ensuring
         /// that it is properly displayed within the parent container.
         /// </summary>
-        private void HandleComboBox()
+        private void HandlePopupComboBox()
         {
             // The label that will be displayed containing the selected item
             // ----------------------------------------------------------------------------
@@ -424,7 +424,7 @@ namespace Maui.ComboBox
 
         private static void CornerRadiusChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            if (bindable is ComboBox container) container.UpdateCornerRadius();
+            if (bindable is PopupComboBox container) container.UpdateCornerRadius();
         }
 
         /// <summary>
