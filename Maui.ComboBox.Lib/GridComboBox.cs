@@ -1,4 +1,4 @@
-﻿using Maui.ComboBox.Lib.Helpers;
+﻿using Maui.ComboBox.Helpers;
 using System.Collections;
 using System.Runtime.CompilerServices;
 

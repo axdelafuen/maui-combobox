@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using Maui.ComboBox.Handlers;
 using Microsoft.Extensions.Logging;
 
 namespace Maui.ComboBox.DebugApp
@@ -9,12 +10,13 @@ namespace Maui.ComboBox.DebugApp
         {
             var builder = MauiApp.CreateBuilder();
             builder.UseMauiApp<App>()
-                   .UseMauiCommunityToolkit()
-                   .ConfigureFonts(fonts => {
-                       fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                       fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                   });
-
+                .UseMauiCommunityToolkit()
+                .UseAxDLFComboBox()
+                .ConfigureFonts(fonts =>
+                {
+                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                });
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

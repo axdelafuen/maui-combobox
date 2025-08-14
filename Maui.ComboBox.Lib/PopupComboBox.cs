@@ -264,7 +264,7 @@ namespace Maui.ComboBox
             };
 
             mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
-            mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            mainButtonLayout.ColumnDefinitions.Add(new ColumnDefinition {});
             mainButtonLayout.Children.Add(selectedItemLabel);
             mainButtonLayout.SetColumn(selectedItemLabel, 0);
             mainButtonLayout.Children.Add(_arrowImage);
@@ -280,13 +280,10 @@ namespace Maui.ComboBox
                 ItemsSource = ItemsSource,
                 ItemTemplate = new DataTemplate(() =>
                 {
-                    var grid = new Grid
+                    var stack = new VerticalStackLayout
                     {
-                        RowDefinitions =
-                        {
-                            new RowDefinition { Height = GridLength.Auto },
-                            new RowDefinition { Height = GridLength.Star },
-                        },
+                        VerticalOptions = LayoutOptions.Center,
+                        HorizontalOptions = LayoutOptions.Fill,
                     };
 
                     var boxView = new BoxView
@@ -307,11 +304,9 @@ namespace Maui.ComboBox
                     label.SetBinding(BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
                     label.SetBinding(Label.TextProperty, new Binding("."));
 
-                    grid.SetRow(boxView, 1);
-                    grid.Children.Add(boxView);
-                    grid.Children.Add(label);
-
-                    return grid;
+                    stack.Add(label);
+                    stack.Add(boxView);
+                    return stack;
                 }),
                 EmptyView = new Label
                 {
@@ -319,7 +314,8 @@ namespace Maui.ComboBox
                     TextColor = Colors.Gray,
                     HorizontalOptions = LayoutOptions.Center,
                     Margin = new Thickness(0, 10),
-                }
+                },
+                ItemSizingStrategy = ItemSizingStrategy.MeasureFirstItem,
             };
             itemCollectionView.SetBinding(CollectionView.ItemsSourceProperty, new Binding(nameof(ItemsSource), source: this));
             itemCollectionView.SetBinding(BackgroundColorProperty, new Binding(nameof(DropdownBackgroundColor), BindingMode.OneWay, source: this));
