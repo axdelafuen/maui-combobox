@@ -23,4 +23,9 @@
         Title="CanvaComboBox"
         ContentTemplate="{DataTemplate samples:CanvaComboBoxSamplePage}"
         Route="CanvaComboBox" />
+
+    <ShellContent
+        Title="NativeComboBox"
+        ContentTemplate="{DataTemplate samples:NativeComboBoxSamplePage}"
+        Route="NativeComboBox" />
 </Shell>

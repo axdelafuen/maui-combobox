@@ -4,15 +4,18 @@ There is no * FREE * ComboBox available in .NET MAUI. (_fuck syncfusion, devexpr
 
 Here is a simple, project for ComboBox implementation. Part of this project is inspired by: [Maui.DropDown by trevleyb](https://github.com/trevleyb/Maui.DropDown). It was initially a fork, but today it has nothing to do with the original project, which is why the repo has become standalone. 
 
-There are currently 3 different ComboBox implementations. Each has its own pros and cons, here's a quick recap of what I've been working on:
+There are currently 4 different ComboBox implementations. Each has its own pros and cons, here's a quick recap of what I've been working on:
 
-| Implementation | Short description | Pros | Cons |
-| - | - | - | - |
-| Popup | With MAUI.Toolkit open a popup with CollectionView of the ItemsSource  | Works :), customizable, reponsive | Bad performances |
-| Canva | Draw a canva with every item from ItemsSource | Lightweight, cutomizable | Bad responsivness (can move UI on open) |
-| Grid | Use Grid and visibility behavior to show/hide the CollectionView of ItemsSource | _working on it_ | _working on it_ |
+|State | Implementation | Short description | Pros | Cons |
+| - | - | - | - | - |
+|🟠 Perf issues | Popup | With MAUI.Toolkit open a popup with CollectionView of the ItemsSource  | Customizable, reponsive | Bad performances |
+|🔴 Not working| Canva | Draw a canva with every item from ItemsSource | Lightweight, cutomizable | Bad responsivness (move UI on open) |
+|🔴 Not working| Grid | Use Grid and visibility behavior to show/hide the CollectionView of ItemsSource | _working on it_ | _working on it_ |
+|🟢 **Android only** | Native implementation | Working with native implementation. (e.g. Android Spinner-DropDown) | Customizable, reponsive, lightweight | Only available for Android now. |
 
-For now, it is recommended to use the `PopupComboBox`. Details on the use of other controls will be written once development are finalized.
+For now, it is recommended to use the `PopupComboBox` for cross-platforms usage.
+
+For **Android** only apps, the native implementation is highly recommended.
 
 ## Samples
 
@@ -58,6 +61,12 @@ Other properties include:
     DropdownOpenImageSource   : Image when dropdown is open V 
     DropdownImageTint         : Image Tint - if you overwrite background, this changes the image color
     DropdownShadow            : Draw a shadow on the dropdown
+
+---
+
+Key points for `NativeComboBox`:
+
+_must be written ..._
 
 ## Author
 

@@ -1,39 +1,49 @@
 ﻿#if ANDROID
-using Microsoft.Maui.Handlers;
-using AndroidX.AppCompat.Widget;
-using Android.Widget;
-using Android.Views;
-using Android.Graphics;
 using Android.Content;
-using System.Collections;
+using Android.Graphics;
+using Android.Views;
+using Android.Widget;
+using Microsoft.Maui.Handlers;
 using Maui.ComboBox.Interfaces;
+using System.Collections;
 using Color = Android.Graphics.Color;
 using View = Android.Views.View;
-using Resource = Microsoft.Maui.Resource;
 
 namespace Maui.ComboBox.Platforms.Android
 {
-    public class NativeSpinnerHandler : ViewHandler<INativeSpinner, AppCompatSpinner>
+    public class NativeSpinnerHandler : ViewHandler<INativeSpinner, AlwaysFireSpinner>
     {
-
         private SpinnerAdapter? _adapter;
         private bool _isUpdatingSelection;
+        private bool _isInitialized = false;
 
-        public NativeSpinnerHandler() : base(ViewHandler.ViewMapper, ViewHandler.ViewCommandMapper) 
-        { }
+        new private static IPropertyMapper<INativeSpinner, NativeSpinnerHandler> ViewMapper = new PropertyMapper<INativeSpinner, NativeSpinnerHandler>(ViewHandler.ViewMapper)
+        {
+            [nameof(INativeSpinner.ItemsSource)] = MapItemsSource,
+            [nameof(INativeSpinner.SelectedIndex)] = MapSelectedIndex,
+            [nameof(INativeSpinner.SelectedItem)] = MapSelectedItem,
+            [nameof(INativeSpinner.Placeholder)] = MapTitle,
+            [nameof(INativeSpinner.TextColor)] = MapTextColor,
+            [nameof(INativeSpinner.FontSize)] = MapFontSize,
+            [nameof(INativeSpinner.IsEnabled)] = MapIsEnabled,
+        };
 
-        protected override AppCompatSpinner CreatePlatformView()
+        new private static CommandMapper<INativeSpinner, NativeSpinnerHandler> ViewCommandMapper = new CommandMapper<INativeSpinner, NativeSpinnerHandler>(ViewHandler.ViewCommandMapper);
+
+        public NativeSpinnerHandler() : base(ViewMapper, ViewCommandMapper) { }
+
+        protected override AlwaysFireSpinner CreatePlatformView()
         {
             var context = Context ?? throw new InvalidOperationException("Context cannot be null");
-            var spinner = new AppCompatSpinner(context);
-
-            // Set default styling to match native Android spinners
+            var spinner = new AlwaysFireSpinner(context, null, global::Android.Resource.Attribute.SpinnerStyle, (int)SpinnerMode.Dropdown);
             spinner.SetBackgroundResource(global::Android.Resource.Drawable.SpinnerBackground);
+
+            spinner.Focusable = true;
 
             return spinner;
         }
 
-        protected override void ConnectHandler(AppCompatSpinner platformView)
+        protected override void ConnectHandler(AlwaysFireSpinner platformView)
         {
             base.ConnectHandler(platformView);
 
@@ -51,46 +61,55 @@ namespace Maui.ComboBox.Platforms.Android
             }
         }
 
-        protected override void DisconnectHandler(AppCompatSpinner platformView)
-        {
-            if (platformView != null)
-            {
-                platformView.ItemSelected -= OnItemSelected;
-                platformView.Adapter = null;
-            }
-
-            _adapter?.Dispose();
-            _adapter = null;
-
-            base.DisconnectHandler(platformView);
-        }
-
         private void CreateAdapter()
         {
             if (Context == null) return;
 
-            _adapter = new SpinnerAdapter(Context, VirtualView.ItemsSource, VirtualView.Title);
-            PlatformView.Adapter = _adapter;
+            SafeDisposeAdapter();
+
+            try
+            {
+                _adapter = new SpinnerAdapter(
+                    Context,
+                    VirtualView?.ItemsSource,
+                    VirtualView?.Placeholder ?? string.Empty,
+                    VirtualView?.SelectedIndex ?? -1
+                );
+
+                PlatformView.Adapter = _adapter;
+            }
+            catch (Exception)
+            {
+                SafeDisposeAdapter();
+                throw;
+            }
         }
 
-        private void OnItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void OnItemSelected(object? sender, AdapterView.ItemSelectedEventArgs e)
         {
-            if (_isUpdatingSelection || VirtualView == null) return;
+            if (_isUpdatingSelection || VirtualView == null || _adapter?.IsDisposed == true)
+                return;
 
-            // Account for title item at position 0
-            var actualPosition = e.Position - 1;
+            try
+            {
+                var position = e.Position;
 
-            if (actualPosition >= 0 && VirtualView.ItemsSource != null && actualPosition < VirtualView.ItemsSource.Count)
-            {
-                VirtualView.SelectedIndex = actualPosition;
-                VirtualView.SelectedItem = VirtualView.ItemsSource[actualPosition];
+                if (VirtualView.SelectedIndex == -1 && position == 0 && !_isInitialized)
+                {
+                    _isInitialized = true;
+                }
+                else if (VirtualView.ItemsSource != null && position >= 0 && position < VirtualView.ItemsSource.Count)
+                {
+                    VirtualView.SelectedIndex = position;
+                    VirtualView.SelectedItem = VirtualView.ItemsSource[position];
+                }
+                else
+                {
+                    VirtualView.SelectedIndex = -1;
+                    VirtualView.SelectedItem = null;
+                }
             }
-            else
-            {
-                // Title was selected or invalid position
-                VirtualView.SelectedIndex = -1;
-                VirtualView.SelectedItem = null;
-            }
+            catch (Exception) { }
         }
 
         #region Property Mappers
@@ -136,30 +155,40 @@ namespace Maui.ComboBox.Platforms.Android
 
         private void UpdateItemsSource()
         {
-            if (_adapter != null && VirtualView != null)
+            if (_adapter?.IsDisposed != false || VirtualView == null) return;
+
+            try
             {
-                _adapter.UpdateItems(VirtualView.ItemsSource, VirtualView.Title);
-                UpdateSelectedIndex();
+                _adapter.UpdateItems(
+                    VirtualView.ItemsSource,
+                    VirtualView.Placeholder ?? string.Empty,
+                    VirtualView.SelectedIndex
+                );
+            }
+            catch (Exception)
+            {
+                CreateAdapter();
             }
         }
 
         private void UpdateSelectedIndex()
         {
-            if (PlatformView == null || VirtualView == null) return;
+            if (PlatformView == null || VirtualView == null || _adapter?.IsDisposed != false)
+                return;
 
             _isUpdatingSelection = true;
             try
             {
                 var selectedIndex = VirtualView.SelectedIndex;
+                _adapter.SelectedIndex = selectedIndex;
 
-                // Add 1 to account for title item at position 0
-                var spinnerPosition = selectedIndex >= 0 ? selectedIndex + 1 : 0;
+                var adapterCount = PlatformView.Adapter?.Count ?? 0;
+                if (selectedIndex < adapterCount)
+                    PlatformView.SetSelection(selectedIndex, false);
 
-                if (spinnerPosition < PlatformView.Adapter?.Count)
-                {
-                    PlatformView.SetSelection(spinnerPosition, false);
-                }
+                _adapter.NotifyDataSetChanged();
             }
+            catch (Exception) { }
             finally
             {
                 _isUpdatingSelection = false;
@@ -168,152 +197,232 @@ namespace Maui.ComboBox.Platforms.Android
 
         private void UpdateTitle()
         {
-            if (_adapter != null && VirtualView != null)
+            if (_adapter?.IsDisposed != false || VirtualView == null) return;
+
+            try
             {
-                _adapter.UpdateTitle(VirtualView.Title);
+                _adapter.UpdateTitle(VirtualView.Placeholder ?? string.Empty);
             }
+            catch (Exception) { }
         }
 
         private void UpdateTextColor()
         {
-            // Text color will be handled by the adapter
-            _adapter?.NotifyDataSetChanged();
+            if (_adapter?.IsDisposed != false) return;
+
+            try
+            {
+                _adapter.NotifyDataSetChanged();
+            }
+            catch (Exception) { }
         }
 
         private void UpdateFontSize()
         {
-            // Font size will be handled by the adapter
-            _adapter?.NotifyDataSetChanged();
+            if (_adapter?.IsDisposed != false) return;
+
+            try
+            {
+                _adapter.NotifyDataSetChanged();
+            }
+            catch (Exception) { }
         }
 
         private void UpdateIsEnabled()
         {
-            if (PlatformView != null && VirtualView != null)
+            if (PlatformView == null || VirtualView == null) return;
+
+            try
             {
                 PlatformView.Enabled = VirtualView.IsEnabled;
                 PlatformView.Alpha = VirtualView.IsEnabled ? 1.0f : 0.5f;
             }
+            catch (Exception) { }
         }
         #endregion
+
+        private void SafeDisposeAdapter()
+        {
+            try
+            {
+                if (_adapter != null && !_adapter.IsDisposed)
+                {
+                    if (PlatformView != null)
+                    {
+                        PlatformView.Adapter = null;
+                    }
+
+                    _adapter.Dispose();
+                }
+            }
+            catch (Exception) { }
+            finally
+            {
+                _adapter = null;
+                _isInitialized = false;
+            }
+        }
+
+        protected override void DisconnectHandler(AlwaysFireSpinner platformView)
+        {
+            try
+            {
+                if (platformView != null)
+                {
+                    platformView.ItemSelected -= OnItemSelected;
+                }
+            }
+            catch (Exception) { }
+            finally
+            {
+                SafeDisposeAdapter();
+                base.DisconnectHandler(platformView);
+                _isInitialized = false;
+            }
+        }
     }
 
     internal class SpinnerAdapter : BaseAdapter, ISpinnerAdapter
     {
-        private readonly Context _context;
-        private readonly LayoutInflater _inflater;
-        private IList _items;
-        private string _title;
+        private readonly LayoutInflater? _inflater;
+        private IList? _items;
+        private string _placeholder;
+        private bool _isDisposed;
 
-        public SpinnerAdapter(Context context, IList items, string title)
+        public int SelectedIndex { get; set; } = -1;
+        public bool IsDisposed => _isDisposed;
+
+        public SpinnerAdapter(Context context, IList? items, string placeholder, int selectedIndex) : base()
         {
-            _context = context;
             _inflater = LayoutInflater.From(context);
             _items = items ?? new List<object>();
-            _title = title ?? string.Empty;
+            _placeholder = placeholder ?? string.Empty;
+            SelectedIndex = selectedIndex;
+            _isDisposed = false;
         }
 
-        public override int Count => (_items?.Count ?? 0) + 1; // +1 for title
+        public override int Count
+        {
+            get
+            {
+                if (_isDisposed) return 0;
+                return _items?.Count ?? 0;
+            }
+        }
 
         public override Java.Lang.Object GetItem(int position)
         {
-            if (position == 0)
-                return new JavaObjectWrapper(_title);
-
-            var actualIndex = position - 1;
-            if (_items != null && actualIndex >= 0 && actualIndex < _items.Count)
-                return new JavaObjectWrapper(_items[actualIndex]);
-
-            return new JavaObjectWrapper(string.Empty);
-        }
-
-        public override long GetItemId(int position) => position;
-
-        public override View GetView(int position, View convertView, ViewGroup parent)
-        {
-            return CreateView(position, convertView, parent, global::Android.Resource.Layout.SimpleSpinnerItem);
-        }
-
-        public override View GetDropDownView(int position, View convertView, ViewGroup parent)
-        {
-            var view = CreateView(position, convertView, parent, global::Android.Resource.Layout.SimpleSpinnerDropDownItem);
-
-            // Style the title differently in dropdown
-            if (position == 0 && view is TextView titleView)
+            if (_isDisposed || _items == null || position < 0 || position >= _items.Count)
             {
-                titleView.SetTextColor(Color.Gray);
-                titleView.SetTypeface(null, TypefaceStyle.Italic);
+                return Java.Lang.String.ValueOf(string.Empty)!; // Safe ?
             }
 
-            return view;
+            var item = _items[position];
+            return Java.Lang.String.ValueOf(item?.ToString())!; // Safe ?
         }
 
-        private View CreateView(int position, View convertView, ViewGroup parent, int layoutResource)
+        public override long GetItemId(int position) => _isDisposed ? 0 : position;
+
+        public override View? GetView(int position, View? convertView, ViewGroup? parent)
         {
-            View view = convertView ?? _inflater.Inflate(layoutResource, parent, false);
+            if (_isDisposed) return null;
 
-            if (view is TextView textView)
+            try
             {
-                var item = GetItem(position);
-                var text = item?.ToString() ?? string.Empty;
+                View? view = convertView ?? _inflater?.Inflate(global::Android.Resource.Layout.SimpleSpinnerItem, parent, false);
 
-                textView.Text = text;
-
-                // Apply styling based on position
-                if (position == 0)
+                if (view is TextView textView)
                 {
-                    // Title styling
-                    textView.SetTextColor(Color.Gray);
-                    if (layoutResource == global::Android.Resource.Layout.SimpleSpinnerItem)
+                    if (SelectedIndex == -1)
                     {
+                        textView.Text = _placeholder;
+                        textView.SetTextColor(Color.Gray);
+                        textView.SetTypeface(null, TypefaceStyle.Italic);
+                    }
+                    else if (_items != null && position >= 0 && position < _items.Count)
+                    {
+                        var item = _items[position];
+                        textView.Text = item?.ToString() ?? string.Empty;
+                        textView.SetTextColor(Color.Black);
                         textView.SetTypeface(null, TypefaceStyle.Normal);
                     }
                 }
-                else
-                {
-                    // Regular item styling
-                    textView.SetTextColor(Color.Black);
-                    textView.SetTypeface(null, TypefaceStyle.Normal);
-                }
-            }
 
-            return view;
+                return view;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
-        public void UpdateItems(IList items, string title)
+        public override View? GetDropDownView(int position, View? convertView, ViewGroup? parent)
         {
-            _items = items ?? new List<object>();
-            _title = title ?? string.Empty;
-            NotifyDataSetChanged();
+            if (_isDisposed) return null;
+
+            try
+            {
+                View? view = convertView ?? _inflater?.Inflate(global::Android.Resource.Layout.SimpleSpinnerDropDownItem, parent, false);
+
+                if (view is TextView textView)
+                {
+                    if (_items != null && position >= 0 && position < _items.Count)
+                    {
+                        var item = _items[position];
+                        textView.Text = item?.ToString() ?? string.Empty;
+                        textView.SetTextColor(Color.Black);
+                        textView.SetTypeface(null, TypefaceStyle.Normal);
+                    }
+                }
+
+                return view;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public void UpdateItems(IList? items, string title, int selectedIndex)
+        {
+            if (_isDisposed) return;
+
+            try
+            {
+                _items = items ?? new List<object>();
+                _placeholder = title ?? string.Empty;
+                SelectedIndex = selectedIndex;
+                NotifyDataSetChanged();
+            }
+            catch (Exception) { }
         }
 
         public void UpdateTitle(string title)
         {
-            _title = title ?? string.Empty;
-            NotifyDataSetChanged();
+            if (_isDisposed) return;
+
+            try
+            {
+                _placeholder = title ?? string.Empty;
+                NotifyDataSetChanged();
+            }
+            catch (Exception) { }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!_isDisposed && disposing)
             {
+                _isDisposed = true;
                 _items = null;
+                _placeholder = string.Empty;
             }
-            base.Dispose(disposing);
-        }
-    }
 
-    internal class JavaObjectWrapper : Java.Lang.Object
-    {
-        private readonly object _obj;
-
-        public JavaObjectWrapper(object obj)
-        {
-            _obj = obj;
-        }
-
-        public override string ToString()
-        {
-            return _obj?.ToString() ?? string.Empty;
+            try
+            {
+                base.Dispose(disposing);
+            }
+            catch (Exception) { }
         }
     }
 }

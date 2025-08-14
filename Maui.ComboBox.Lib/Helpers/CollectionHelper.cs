@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Maui.ComboBox.Lib.Helpers
+namespace Maui.ComboBox.Helpers
 {
     public static class CollectionHelper
     {

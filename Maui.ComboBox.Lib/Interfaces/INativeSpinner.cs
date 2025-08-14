@@ -12,7 +12,7 @@ namespace Maui.ComboBox.Interfaces
         /// <summary>
         /// Currently selected item
         /// </summary>
-        object SelectedItem { get; set; }
+        object? SelectedItem { get; set; }
 
         /// <summary>
         /// Index of the currently selected item
@@ -22,7 +22,7 @@ namespace Maui.ComboBox.Interfaces
         /// <summary>
         /// Title/hint text shown when no item is selected
         /// </summary>
-        string Title { get; set; }
+        string Placeholder { get; set; }
 
         /// <summary>
         /// Text color for the spinner
@@ -37,7 +37,7 @@ namespace Maui.ComboBox.Interfaces
         /// <summary>
         /// Whether the spinner is enabled
         /// </summary>
-        bool IsEnabled { get; set; }
+        new bool IsEnabled { get; set; }
 
         /// <summary>
         /// Event fired when selection changes
@@ -47,11 +47,11 @@ namespace Maui.ComboBox.Interfaces
 
     public class SpinnerSelectionChangedEventArgs : EventArgs
     {
-        public object SelectedItem { get; }
+        public object? SelectedItem { get; }
         public int SelectedIndex { get; }
         public object PreviousSelection { get; }
 
-        public SpinnerSelectionChangedEventArgs(object selectedItem, int selectedIndex, object previousSelection)
+        public SpinnerSelectionChangedEventArgs(object? selectedItem, int selectedIndex, object previousSelection)
         {
             SelectedItem = selectedItem;
             SelectedIndex = selectedIndex;

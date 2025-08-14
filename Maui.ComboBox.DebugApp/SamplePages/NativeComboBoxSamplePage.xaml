@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Maui.ComboBox;assembly=Maui.ComboBox.Lib"
+             xmlns:local="clr-namespace:Maui.ComboBox.DebugApp.SamplePages"
+             x:Class="Maui.ComboBox.DebugApp.SamplePages.NativeComboBoxSamplePage"
+             x:DataType="local:NativeComboBoxSamplePage"
+             Title="NativeComboBox">
+    <VerticalStackLayout>
+        <Label
+            Text="NativeComboBox Control Test!"
+            Style="{StaticResource SubHeadline}"/>
+
+        <Button 
+            Text="Clear Selection"
+            Clicked="Button_Clicked"/>
+
+        <Label
+            Text="With placeholder test:"/>
+        
+        <controls:AndroidComboBox
+            Placeholder="Select..."
+            ItemsSource="{Binding ObjectItemsSource}"
+            SelectedItem="{Binding SelectedObjectItem}"/>
+
+        <Label
+            Text="Without placeholder test:"/>
+
+        <controls:AndroidComboBox
+            ItemsSource="{Binding ObjectItemsSource}"
+            SelectedItem="{Binding SelectedObjectItem}"/>
+    </VerticalStackLayout>
+</ContentPage>
